@@ -1,9 +1,11 @@
 <template>
-    
+    <div>
+        <h1>Bienvenido de nuevo</h1>
+    </div>
 </template>
 <script>
 export default {
-    name: 'App',
+    name: 'HomeVue',
     data() {
         return {
         }
