@@ -234,7 +234,7 @@ body{
     margin-right: 25px;
     margin-bottom: 25px;
     transition: margin-left 0.5s ease;
-    padding: 15px;
+    padding: 35px;
     background-color: #fff;
     height: 93vh;
     border-radius: 20px;
@@ -243,6 +243,10 @@ body{
     -ms-border-radius: 20px;
     -o-border-radius: 20px;
     overflow-y: auto;
+    -webkit-transition: margin-left 0.5s ease;
+    -moz-transition: margin-left 0.5s ease;
+    -ms-transition: margin-left 0.5s ease;
+    -o-transition: margin-left 0.5s ease;
 }
 
 .navigation.active + .content {

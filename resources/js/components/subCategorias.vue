@@ -1,12 +1,12 @@
 <template>
     <div>
-        <h2 class="text-center mb-10">Categorías</h2>
+        <h2 class="text-center mb-10">Sub Categorías</h2>
         <div class="text-end my-5">
             <v-btn variant="tonal" color="primary" @click="card = true, cardAction = 'nuevo'"><i
                     class="fa-solid fa-plus"></i> Nuevo</v-btn>
         </div>
         <v-text-field variant="outlined" label="buscar" v-model="search"></v-text-field>
-        <v-data-table :headers="headers" :items="itemsCategorias" :search="search">
+        <v-data-table :headers="headers" :items="itemsSubCategorias" :search="search">
             <template v-slot:[`item.created_at`]="{ item }">
                 {{ new Date(item.created_at).toLocaleString() }}
             </template>
@@ -26,6 +26,7 @@
             <v-card-title class="text-center">{{ cardAction == 'nuevo' ? 'Registro de Categorías' : 'Actualizar Categoría' }}</v-card-title>
             <v-card-text>
                 <v-row>
+                    <v-col cols="12"><v-autocomplete variant="outlined" label="Seleccione la categoría" v-model="dataSave.categoria" :items="itemsCategorias" item-title="nombre" item-value="id" :error-messages="errors.categoria"></v-autocomplete></v-col>
                     <v-col cols="12"><v-text-field label="Nombre" v-model="dataSave.nombre"
                             :error-messages="errors.nombre" variant="outlined"></v-text-field></v-col>
                     <v-col cols="12"><v-textarea label="Descripción"
@@ -71,7 +72,7 @@ import Swal from 'sweetalert2';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 export default {
-    name: 'CategoriasVue',
+    name: 'subCategoriasVue',
     data() {
         return {
             headers: [
@@ -81,6 +82,7 @@ export default {
                 { title: 'Última actualización', key: 'updated_at', align: 'center' },
                 { title: 'Opciones', key: 'actions', align: 'center' },
             ],
+            itemsSubCategorias: [],
             itemsCategorias: [],
             card: false,
             cardAction: '',
@@ -89,6 +91,7 @@ export default {
                 id: '',
                 nombre: '',
                 descripcion: '',
+                categoria: null,
             },
             errors: {},
             overlay: false,
@@ -96,6 +99,24 @@ export default {
         }
     },
     methods: {
+        getData() {
+            this.overlay = true;
+            axios.get("/subcategorias").then(res => {
+                this.overlay = false;
+                this.itemsSubCategorias = res.data;
+            }).catch((err) => {
+                this.overlay = false;
+                Swal.fire({
+                    title: '¡Hubo un error al obtener datos!',
+                    icon: 'error',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#00A38C',
+                    customClass: {
+                        confirmButton: 'custom-confirm-button',
+                    }
+                });
+            });
+        },
         getCategorias() {
             this.overlay = true;
             axios.get("/categorias").then(res => {
@@ -109,7 +130,7 @@ export default {
                     allowOutsideClick: false,
                     confirmButtonColor: '#00A38C',
                     customClass: {
-                        confirmButton: 'custom-confirm-button',  // Clase personalizada
+                        confirmButton: 'custom-confirm-button',
                     }
                 });
             });
@@ -117,12 +138,15 @@ export default {
         limpiar(){
             this.dataSave.nombre = '';
             this.dataSave.descripcion = '';
+            this.dataSave.categoria = '';
+            this.dataSave.id = null;
         },
         guardar() {
             this.overlay = true;
-            axios.post("/categorias", {
+            axios.post("/subcategorias", {
                 nombre: this.dataSave.nombre,
                 descripcion: this.dataSave.descripcion,
+                categoria: this.dataSave.categoria,
             }).then(res => {
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
@@ -131,7 +155,7 @@ export default {
                 });
                 this.limpiar();
                 this.card = false;
-                this.getCategorias();
+                this.getData();
             }).catch((error) => {
                 this.overlay = false;
                 toast.error("¡Hubo un error al guardar los datos!", {
@@ -150,13 +174,15 @@ export default {
             this.cardAction = 'editar';
             this.dataSave.nombre = item.nombre;
             this.dataSave.descripcion = item.descripcion;
+            this.dataSave.categoria = item.categorias_id;
             this.dataSave.id = item.id;
         },
         guardarCambios(){
             this.overlay = true;
-            axios.put(`categorias/${this.dataSave.id}`,{
+            axios.put(`subcategorias/${this.dataSave.id}`,{
                 nombre: this.dataSave.nombre,
                 descripcion: this.dataSave.descripcion,
+                categoria: this.dataSave.categoria,
             }).then(res => {
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
@@ -165,7 +191,7 @@ export default {
                 });
                 this.limpiar();
                 this.card = false;
-                this.getCategorias();
+                this.getData();
             }).catch((error) => {
                 this.overlay = false;
                 toast.error("¡Hubo un error al guardar cambios a los datos!", {
@@ -181,14 +207,14 @@ export default {
         },
         eliminar() {
             this.overlay = true;
-            axios.delete(`/categorias/${this.dataSave.id}`).then(res=>{
+            axios.delete(`/subcategorias/${this.dataSave.id}`).then(res=>{
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
                     autoClose: 3000,
                     position: toast.POSITION.BOTTOM_RIGHT,
                 });
                 this.dialogEliminar = false;
-                this.getCategorias();
+                this.getData();
             }).catch((error) => {
                 this.overlay = false;
                 toast.error("¡Hubo un error al eliminar los datos!", {
@@ -204,6 +230,7 @@ export default {
         }
     },
     mounted() {
+        this.getData();
         this.getCategorias();
     }
 }

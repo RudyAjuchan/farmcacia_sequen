@@ -23,21 +23,21 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="/dashboard">
                         <span class="icon"><ion-icon name="home-outline"></ion-icon></span>
                         <span class="title">Dashboard</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#">
-                        <span class="icon"><ion-icon name="person-outline"></ion-icon></span>
-                        <span class="title">Customers</span>
+                    <a href="/dashboard#/categorias">
+                        <span class="icon"><ion-icon name="briefcase-outline"></ion-icon></span>
+                        <span class="title">Categorias</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#">
-                        <span class="icon"><ion-icon name="chatbubble-outline"></ion-icon></span>
-                        <span class="title">Messages</span>
+                    <a href="/dashboard#/subcategorias">
+                        <span class="icon"><ion-icon name="folder-open-outline"></ion-icon></span>
+                        <span class="title">Sub categorias</span>
                     </a>
                 </li>
                 <li>
