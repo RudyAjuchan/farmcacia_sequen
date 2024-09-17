@@ -16,7 +16,7 @@ class Producto extends Model
 
     public function proveedor()
     {
-        return $this->belongsTo(Proveedores::class);
+        return $this->belongsTo(Proveedores::class, 'proveedores_id');
     }
 
     public function loteProductos()

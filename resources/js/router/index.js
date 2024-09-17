@@ -4,6 +4,7 @@ const HomeComponent = () => import('../components/Home.vue');
 const CategoriasComponent = () => import('../components/categorias.vue');
 const subCategoriasComponent = () => import('../components/subCategorias.vue');
 const proveedoresComponent = () => import('../components/proveedores.vue');
+const productosComponent = () => import('../components/productos.vue');
 const routes = [
     { 
         path: '/', 
@@ -24,6 +25,11 @@ const routes = [
         path: '/proveedores', 
         name: 'proveedoresVue', 
         component: proveedoresComponent 
+    },
+    { 
+        path: '/productos', 
+        name: 'productosVue', 
+        component: productosComponent 
     },
 ];
 const router = createRouter({

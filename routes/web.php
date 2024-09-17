@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoriasController;
+use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\proveedoresController;
 use App\Http\Controllers\subCategoriaController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('subcategorias', subCategoriaController::class);
     /* RUTAS PARA PROVEEDORES */
     Route::apiResource('proveedores', proveedoresController::class);
+    /* RUTAS PARA PRODUCTOS */
+    Route::apiResource('productos', ProductosController::class);
 });
 
 require __DIR__.'/auth.php';

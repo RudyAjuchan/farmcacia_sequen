@@ -42,14 +42,14 @@
                 </li>
                 <li>
                     <a href="/dashboard#/proveedores">
-                        <span class="icon"><ion-icon name="cube-outline"></ion-icon></span>
+                        <span class="icon"><ion-icon name="business-outline"></ion-icon></span>
                         <span class="title">Proveedores</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#">
-                        <span class="icon"><ion-icon name="settings-outline"></ion-icon></span>
-                        <span class="title">Settings</span>
+                    <a href="/dashboard#/productos">
+                        <span class="icon"><ion-icon name="cube-outline"></ion-icon></span>
+                        <span class="title">Productos</span>
                     </a>
                 </li>
                 <li>
