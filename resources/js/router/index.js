@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 const HomeComponent = () => import('../components/Home.vue');
 const CategoriasComponent = () => import('../components/categorias.vue');
 const subCategoriasComponent = () => import('../components/subCategorias.vue');
+const proveedoresComponent = () => import('../components/proveedores.vue');
 const routes = [
     { 
         path: '/', 
@@ -18,6 +19,11 @@ const routes = [
         path: '/subcategorias', 
         name: 'subCategoriasVue', 
         component: subCategoriasComponent 
+    },
+    { 
+        path: '/proveedores', 
+        name: 'proveedoresVue', 
+        component: proveedoresComponent 
     },
 ];
 const router = createRouter({

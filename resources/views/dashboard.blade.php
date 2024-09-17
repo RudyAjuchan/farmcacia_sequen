@@ -41,9 +41,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#">
-                        <span class="icon"><ion-icon name="help-outline"></ion-icon></span>
-                        <span class="title">Help</span>
+                    <a href="/dashboard#/proveedores">
+                        <span class="icon"><ion-icon name="cube-outline"></ion-icon></span>
+                        <span class="title">Proveedores</span>
                     </a>
                 </li>
                 <li>

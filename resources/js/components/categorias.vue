@@ -154,7 +154,7 @@ export default {
         },
         guardarCambios(){
             this.overlay = true;
-            axios.put(`categorias/${this.dataSave.id}`,{
+            axios.put(`/categorias/${this.dataSave.id}`,{
                 nombre: this.dataSave.nombre,
                 descripcion: this.dataSave.descripcion,
             }).then(res => {

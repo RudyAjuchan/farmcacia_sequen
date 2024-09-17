@@ -1,12 +1,12 @@
 <template>
     <div>
-        <h2 class="text-center mb-10">Sub Categorías</h2>
+        <h2 class="text-center mb-10">Proveedores</h2>
         <div class="text-end my-5">
             <v-btn variant="tonal" color="primary" @click="card = true, cardAction = 'nuevo'"><i
                     class="fa-solid fa-plus"></i> Nuevo</v-btn>
         </div>
         <v-text-field variant="outlined" label="buscar" v-model="search"></v-text-field>
-        <v-data-table :headers="headers" :items="itemsSubCategorias" :search="search">
+        <v-data-table :headers="headers" :items="itemsProveedor" :search="search">
             <template v-slot:[`item.created_at`]="{ item }">
                 {{ new Date(item.created_at).toLocaleString() }}
             </template>
@@ -23,14 +23,21 @@
 
     <v-dialog v-model="card" persistent>
         <v-card width="1000" class="mx-auto">
-            <v-card-title class="text-center">{{ cardAction == 'nuevo' ? 'Registro de Sub Categorías' : 'Actualizar Sub Categoría' }}</v-card-title>
+            <v-card-title class="text-center">{{ cardAction == 'nuevo' ? 'Registro de Proveedor' : 'Actualizar proveedor' }}</v-card-title>
             <v-card-text>
                 <v-row>
-                    <v-col cols="12"><v-autocomplete variant="outlined" label="Seleccione la categoría" v-model="dataSave.categoria" :items="itemsCategorias" item-title="nombre" item-value="id" :error-messages="errors.categoria"></v-autocomplete></v-col>
-                    <v-col cols="12"><v-text-field label="Nombre" v-model="dataSave.nombre"
-                            :error-messages="errors.nombre" variant="outlined"></v-text-field></v-col>
-                    <v-col cols="12"><v-textarea label="Descripción"
-                            v-model="dataSave.descripcion" variant="outlined"></v-textarea></v-col>
+                    <v-col cols="12">
+                        <v-text-field label="Nombre" v-model="dataSave.nombre"
+                        :error-messages="errors.nombre" variant="outlined"></v-text-field>
+                        <v-text-field label="Contacto"
+                        v-model="dataSave.contacto" variant="outlined"></v-text-field>
+                        <v-text-field label="Dirección"
+                        v-model="dataSave.direccion" variant="outlined"></v-text-field>
+                        <v-text-field label="Telefono"
+                        v-model="dataSave.telefono" variant="outlined" :error-messages="errors.telefono"></v-text-field>
+                        <v-text-field label="Correo electrónico"
+                        v-model="dataSave.email" variant="outlined" :error-messages="errors.email"></v-text-field>
+                    </v-col>
                 </v-row>
             </v-card-text>
             <v-card-actions>
@@ -72,26 +79,30 @@ import Swal from 'sweetalert2';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 export default {
-    name: 'subCategoriasVue',
+    name: 'proveedoresVue',
     data() {
         return {
             headers: [
                 { title: 'Nombre', key: 'nombre', align: 'start' },
-                { title: 'Descripción', key: 'descripcion', align: 'start' },
+                { title: 'Contacto', key: 'contacto', align: 'start' },
+                { title: 'Dirección', key: 'direccion', align: 'start' },
+                { title: 'Teléfono', key: 'telefono', align: 'start' },
+                { title: 'Correo', key: 'email', align: 'start' },
                 { title: 'Creado', key: 'created_at', align: 'center' },
                 { title: 'Última actualización', key: 'updated_at', align: 'center' },
                 { title: 'Opciones', key: 'actions', align: 'center' },
             ],
-            itemsSubCategorias: [],
-            itemsCategorias: [],
+            itemsProveedor: [],
             card: false,
             cardAction: '',
             search: '',
             dataSave: {
                 id: '',
                 nombre: '',
-                descripcion: '',
-                categoria: null,
+                contacto: '',
+                direccion: '',
+                telefono: '',
+                email: '',
             },
             errors: {},
             overlay: false,
@@ -101,27 +112,9 @@ export default {
     methods: {
         getData() {
             this.overlay = true;
-            axios.get("/subcategorias").then(res => {
+            axios.get("/proveedores").then(res => {
                 this.overlay = false;
-                this.itemsSubCategorias = res.data;
-            }).catch((err) => {
-                this.overlay = false;
-                Swal.fire({
-                    title: '¡Hubo un error al obtener datos!',
-                    icon: 'error',
-                    allowOutsideClick: false,
-                    confirmButtonColor: '#00A38C',
-                    customClass: {
-                        confirmButton: 'custom-confirm-button',
-                    }
-                });
-            });
-        },
-        getCategorias() {
-            this.overlay = true;
-            axios.get("/categorias").then(res => {
-                this.overlay = false;
-                this.itemsCategorias = res.data;
+                this.itemsProveedor = res.data;
             }).catch((err) => {
                 this.overlay = false;
                 Swal.fire({
@@ -137,16 +130,20 @@ export default {
         },
         limpiar(){
             this.dataSave.nombre = '';
-            this.dataSave.descripcion = '';
-            this.dataSave.categoria = '';
+            this.dataSave.contacto = '';
+            this.dataSave.direccion = '';
+            this.dataSave.telefono = '';
+            this.dataSave.email = '';
             this.dataSave.id = null;
         },
         guardar() {
             this.overlay = true;
-            axios.post("/subcategorias", {
+            axios.post("/proveedores", {
                 nombre: this.dataSave.nombre,
-                descripcion: this.dataSave.descripcion,
-                categoria: this.dataSave.categoria,
+                contacto: this.dataSave.contacto,
+                direccion: this.dataSave.direccion,
+                telefono: this.dataSave.telefono,
+                email: this.dataSave.email,
             }).then(res => {
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
@@ -173,16 +170,21 @@ export default {
             this.card = true;
             this.cardAction = 'editar';
             this.dataSave.nombre = item.nombre;
-            this.dataSave.descripcion = item.descripcion;
-            this.dataSave.categoria = item.categorias_id;
+            this.dataSave.contacto = item.contacto;
+            this.dataSave.direccion = item.direccion;
+            this.dataSave.telefono = item.telefono;
+            this.dataSave.email = item.email;
             this.dataSave.id = item.id;
         },
         guardarCambios(){
             this.overlay = true;
-            axios.put(`/subcategorias/${this.dataSave.id}`,{
+            console.log(this.dataSave.id);
+            axios.put(`/proveedores/${this.dataSave.id}`,{
                 nombre: this.dataSave.nombre,
-                descripcion: this.dataSave.descripcion,
-                categoria: this.dataSave.categoria,
+                contacto: this.dataSave.contacto,
+                direccion: this.dataSave.direccion,
+                telefono: this.dataSave.telefono,
+                email: this.dataSave.email,
             }).then(res => {
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
@@ -207,7 +209,7 @@ export default {
         },
         eliminar() {
             this.overlay = true;
-            axios.delete(`/subcategorias/${this.dataSave.id}`).then(res=>{
+            axios.delete(`/proveedores/${this.dataSave.id}`).then(res=>{
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
                     autoClose: 3000,
@@ -231,7 +233,6 @@ export default {
     },
     mounted() {
         this.getData();
-        this.getCategorias();
     }
 }
 </script>
