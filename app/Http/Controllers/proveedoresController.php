@@ -33,7 +33,7 @@ class proveedoresController extends Controller
                 $proveedor->telefono = $request->telefono;
                 $proveedor->email = $request->email;
                 $proveedor->save();
-                return response()->json(['message' => 'Proveedor creada con éxito'], 201);
+                return response()->json(['message' => 'Proveedor creada con éxito', 'data' => $proveedor], 201);
             }catch(\Exception $e){
                 return response()->json(['error' => 'Error al guardar el proveedor', 'details' => $e->getMessage()], 500);
             }

@@ -26,7 +26,9 @@
             <v-card-title class="text-center">{{ cardAction == 'nuevo' ? 'Registro de Producto' : 'Actualizar Producto' }}</v-card-title>
             <v-card-text>
                 <v-row>
-                    <v-col cols="12"><v-autocomplete variant="outlined" label="Seleccione el proveedor" v-model="dataSave.proveedor" :items="itemsProveedores" item-title="nombre" item-value="id" :error-messages="errors.proveedor"></v-autocomplete></v-col>
+                    <v-col cols="12"><v-autocomplete variant="outlined" label="Seleccione el proveedor" v-model="dataSave.proveedor" :items="itemsProveedores" 
+                        item-title="nombre" item-value="id" :error-messages="errors.proveedor" append-inner-icon="mdi-plus"
+                        @click:append-inner="card=false, cardProveedor=true"></v-autocomplete></v-col>
                     <v-col cols="12"><v-text-field label="Nombre" v-model="dataSave.nombre"
                             :error-messages="errors.nombre" variant="outlined"></v-text-field></v-col>
                     <v-col cols="12"><v-textarea label="Descripción"
@@ -66,6 +68,34 @@
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <!-- DIALOG PARA INSERTAR DATOS DE PROVEEDORES -->
+    <v-dialog v-model="cardProveedor" persistent>
+        <v-card width="1000" class="mx-auto">
+            <v-card-title class="text-center">Registro de Proveedor</v-card-title>
+            <v-card-text>
+                <v-row>
+                    <v-col cols="12">
+                        <v-text-field label="Nombre" v-model="dataSave2.nombre"
+                        :error-messages="errors2.nombre" variant="outlined"></v-text-field>
+                        <v-text-field label="Contacto"
+                        v-model="dataSave2.contacto" variant="outlined"></v-text-field>
+                        <v-text-field label="Dirección"
+                        v-model="dataSave2.direccion" variant="outlined"></v-text-field>
+                        <v-text-field label="Telefono"
+                        v-model="dataSave2.telefono" variant="outlined" :error-messages="errors2.telefono"></v-text-field>
+                        <v-text-field label="Correo electrónico"
+                        v-model="dataSave2.email" variant="outlined" :error-messages="errors2.email"></v-text-field>
+                    </v-col>
+                </v-row>
+            </v-card-text>
+            <v-card-actions>
+                <v-btn color="secondary" variant="tonal" @click="guardarProveedor">Guardar</v-btn>
+                <v-btn color="red" variant="tonal" @click="cardProveedor=false,card = true, limpiar2()">Cancelar</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
 </template>
 <script>
 import Swal from 'sweetalert2';
@@ -87,6 +117,7 @@ export default {
             itemsProductos: [],
             itemsProveedores: [],
             card: false,
+            cardProveedor: false,
             cardAction: '',
             search: '',
             dataSave: {
@@ -96,8 +127,17 @@ export default {
                 proveedor: null,
             },
             errors: {},
+            errors2: {},
             overlay: false,
             dialogEliminar: false,
+            dataSave2: {
+                id: '',
+                nombre: '',
+                contacto: '',
+                direccion: '',
+                telefono: '',
+                email: '',
+            },
         }
     },
     methods: {
@@ -144,6 +184,15 @@ export default {
             this.dataSave.id = null;
             this.errors = {};
         },
+        limpiar2(){
+            this.dataSave2.nombre = '';
+            this.dataSave2.contacto = '';
+            this.dataSave2.direccion = '';
+            this.dataSave2.telefono = '';
+            this.dataSave2.email = '';
+            this.dataSave2.id = null;
+            this.errors2 = {};
+        },
         guardar() {
             this.overlay = true;
             axios.post("/productos", {
@@ -167,6 +216,38 @@ export default {
                 });
                 if (error.response && error.response.status === 422) {
                     this.errors = error.response.data.errors;
+                } else {
+                    // Manejo de otros errores o código adicional
+                }
+            });
+        },
+        guardarProveedor() {
+            this.overlay = true;
+            axios.post("/proveedores", {
+                nombre: this.dataSave2.nombre,
+                contacto: this.dataSave2.contacto,
+                direccion: this.dataSave2.direccion,
+                telefono: this.dataSave2.telefono,
+                email: this.dataSave2.email,
+            }).then(res => {
+                this.overlay = false;
+                toast.success("Se han guardado los datos", {
+                    autoClose: 3000,
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                });
+                this.limpiar2();
+                this.card = true;
+                this.cardProveedor = false;
+                this.getProveedores();
+                this.dataSave.proveedor = res.data.data.id;
+            }).catch((error) => {
+                this.overlay = false;
+                toast.error("¡Hubo un error al guardar los datos!", {
+                    autoClose: 3000,
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                });
+                if (error.response && error.response.status === 422) {
+                    this.errors2 = error.response.data.errors;
                 } else {
                     // Manejo de otros errores o código adicional
                 }
