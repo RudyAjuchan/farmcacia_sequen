@@ -117,6 +117,7 @@ export default {
         limpiar(){
             this.dataSave.nombre = '';
             this.dataSave.descripcion = '';
+            this.errors = {};
         },
         guardar() {
             this.overlay = true;

@@ -135,6 +135,7 @@ export default {
             this.dataSave.telefono = '';
             this.dataSave.email = '';
             this.dataSave.id = null;
+            this.errors = {};
         },
         guardar() {
             this.overlay = true;

@@ -140,6 +140,7 @@ export default {
             this.dataSave.descripcion = '';
             this.dataSave.categoria = '';
             this.dataSave.id = null;
+            this.errors = {};
         },
         guardar() {
             this.overlay = true;
