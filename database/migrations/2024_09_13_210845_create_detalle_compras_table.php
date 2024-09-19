@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('cantidad');
             $table->decimal('precio_unitario', 8,2);
+            $table->decimal('precio_compra', 8,2);
             $table->foreignId('compras_id')->constrained('compras');
             $table->foreignId('productos_id')->constrained('productos');
             $table->foreignId('lote_productos_id')->constrained('lote_productos');
