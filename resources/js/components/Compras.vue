@@ -52,15 +52,19 @@
                                                 v-model="dataSaveDetalle.producto" required
                                                 :rules="requiredRules"></v-autocomplete>
                                         </v-col>
-                                        <v-col cols="2">
+                                        <v-col cols="6">
+                                            <v-text-field label="fecha_vencimiento" type="date" v-model="dataSaveDetalle.fecha_vencimiento" :rules="requiredRules" 
+                                            required variant="outlined"></v-text-field>
+                                        </v-col>
+                                        <v-col cols="4">
                                             <v-text-field label="cantidad" variant="outlined" required
                                                 :rules="numeroRules" v-model="dataSaveDetalle.cantidad"></v-text-field>
                                         </v-col>
-                                        <v-col cols="2">
+                                        <v-col cols="4">
                                             <v-text-field label="precio compra" variant="outlined" required
                                                 :rules="numeroRules" v-model="dataSaveDetalle.compra"></v-text-field>
                                         </v-col>
-                                        <v-col cols="2">
+                                        <v-col cols="4">
                                             <v-text-field label="precio venta" variant="outlined" required
                                                 :rules="numeroRules" v-model="dataSaveDetalle.venta"></v-text-field>
                                         </v-col>
@@ -208,6 +212,7 @@ export default {
                 cantidad: '',
                 compra: '',
                 venta: '',
+                fecha_vencimiento: '',
                 id: null,
             },
             errors2: {},
@@ -280,8 +285,10 @@ export default {
             });
         },
         limpiar(){
-            this.dataSave.nombre = '';
-            this.dataSave.descripcion = '';
+            this.dataSave.id = '';
+            this.dataSave.fecha_compra = '';
+            this.dataSave.total = 0;
+            this.dataSave.proveedor = '';
             this.errors = {};
             this.itemsDetalle = [];
             this.total = 0;
@@ -297,9 +304,11 @@ export default {
         },
         guardar() {
             this.overlay = true;
-            axios.post("/categorias", {
-                nombre: this.dataSave.nombre,
-                descripcion: this.dataSave.descripcion,
+            axios.post("/compras", {
+                proveedor: this.dataSave.proveedor,
+                fecha_compra: this.dataSave.fecha_compra,
+                total: this.total,
+                carrito: this.itemsDetalle,
             }).then(res => {
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
@@ -307,6 +316,7 @@ export default {
                     position: toast.POSITION.BOTTOM_RIGHT,
                 });
                 this.limpiar();
+                this.limpiar2();
                 this.card = false;
                 this.getData();
             }).catch((error) => {
@@ -317,6 +327,20 @@ export default {
                 });
                 if (error.response && error.response.status === 422) {
                     this.errors = error.response.data.errors;
+                    if (this.errors.carrito) {
+                        this.card = false;
+                        Swal.fire({
+                            title: '¡Para guardar una compra debes agregar productos!',
+                            icon: 'warning',
+                            allowOutsideClick: false,
+                            confirmButtonColor: '#00A38C',
+                            customClass: {
+                                confirmButton: 'custom-confirm-button',
+                            }
+                        }).then(response => {
+                            this.card = true;
+                        })
+                    }
                 } else {
                     // Manejo de otros errores o código adicional
                 }
@@ -424,6 +448,7 @@ export default {
                         this.itemsDetalle[busquedaCarrito.id].cantidad+=parseInt(this.dataSaveDetalle.cantidad);
                         this.itemsDetalle[busquedaCarrito.id].compra=parseInt(this.dataSaveDetalle.compra);
                         this.itemsDetalle[busquedaCarrito.id].venta=parseInt(this.dataSaveDetalle.venta);
+                        this.itemsDetalle[busquedaCarrito.id].fecha_vencimiento=parseInt(this.dataSaveDetalle.fecha_vencimiento);
                         this.itemsDetalle[busquedaCarrito.id].subtotal=(parseFloat(this.itemsDetalle[busquedaCarrito.id].compra)*parseFloat(this.itemsDetalle[busquedaCarrito.id].cantidad));
                     }else{
                         this.itemsDetalle.push({
@@ -432,6 +457,7 @@ export default {
                             cantidad: parseInt(this.dataSaveDetalle.cantidad),
                             compra: parseFloat(this.dataSaveDetalle.compra),
                             venta: parseFloat(this.dataSaveDetalle.venta),
+                            fecha_vencimiento: this.dataSaveDetalle.fecha_vencimiento,
                             subtotal: (parseFloat(this.dataSaveDetalle.compra)*parseFloat(this.dataSaveDetalle.cantidad))
                         })
                         this.index++;
@@ -442,6 +468,7 @@ export default {
                     this.itemsDetalle[this.dataSaveDetalle.id].cantidad = this.dataSaveDetalle.cantidad;
                     this.itemsDetalle[this.dataSaveDetalle.id].compra = this.dataSaveDetalle.compra;
                     this.itemsDetalle[this.dataSaveDetalle.id].venta = this.dataSaveDetalle.venta;
+                    this.itemsDetalle[this.dataSaveDetalle.id].fecha_vencimiento = this.dataSaveDetalle.fecha_vencimiento;
                     this.itemsDetalle[this.dataSaveDetalle.id].subtotal = (parseFloat(this.dataSaveDetalle.compra)*parseFloat(this.dataSaveDetalle.cantidad));
                     this.total = this.itemsDetalle.reduce((sum, item) => sum + item.subtotal, 0);
                 }
@@ -449,6 +476,7 @@ export default {
                 this.dataSaveDetalle.cantidad = null;
                 this.dataSaveDetalle.compra = null;
                 this.dataSaveDetalle.venta = null;
+                this.dataSaveDetalle.fecha_vencimiento = null;
                 this.dataSaveDetalle.id = null;
             }else{
                 this.card = false;
@@ -474,6 +502,7 @@ export default {
             this.dataSaveDetalle.cantidad = item.cantidad;
             this.dataSaveDetalle.compra = item.compra;
             this.dataSaveDetalle.venta = item.venta;
+            this.dataSaveDetalle.fecha_vencimiento = item.fecha_vencimiento;
             this.dataSaveDetalle.id = item.id;
         },
         eliminarCarrito(item){
