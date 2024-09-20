@@ -26,10 +26,17 @@
             <v-card-title class="text-center">{{ cardAction == 'nuevo' ? 'Registro de Producto' : 'Actualizar Producto' }}</v-card-title>
             <v-card-text>
                 <v-row>
-                    <v-col cols="12"><v-autocomplete variant="outlined" label="Seleccione el proveedor" v-model="dataSave.proveedor" :items="itemsProveedores" 
+                    <v-col cols="6"><v-autocomplete variant="outlined" label="Seleccione el proveedor" v-model="dataSave.proveedor" :items="itemsProveedores" 
                         item-title="nombre" item-value="id" :error-messages="errors.proveedor" append-inner-icon="mdi-plus"
-                        @click:append-inner="card=false, cardProveedor=true"></v-autocomplete></v-col>
-                    <v-col cols="12"><v-text-field label="Nombre" v-model="dataSave.nombre"
+                        @click:append-inner="card=false, cardProveedor=true"></v-autocomplete>
+                    </v-col>
+                    <v-col cols="6">
+                        <v-autocomplete variant="outlined" label="Seleccione la subcategoría" v-model="dataSave.subcategoria" :items="itemsSubCategoria" 
+                        item-title="nombre" item-value="id" :error-messages="errors.subcategoria" append-inner-icon="mdi-plus"
+                        @click:append-inner="card=false, cardSubcategoria=true"></v-autocomplete>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-text-field label="Nombre" v-model="dataSave.nombre"
                             :error-messages="errors.nombre" variant="outlined"></v-text-field></v-col>
                     <v-col cols="12"><v-textarea label="Descripción"
                             v-model="dataSave.descripcion" variant="outlined" :error-messages="errors.descripcion"></v-textarea></v-col>
@@ -96,6 +103,47 @@
         </v-card>
     </v-dialog>
 
+    <!-- DIALOG PARA GUARDAR SUBCATEGORÍAS -->
+    <v-dialog v-model="cardSubcategoria" persistent>
+        <v-card width="1000" class="mx-auto">
+            <v-card-title class="text-center">Registro de Sub Categorías</v-card-title>
+            <v-card-text>
+                <v-row>
+                    <v-col cols="12"><v-autocomplete variant="outlined" label="Seleccione la categoría" v-model="dataSubCategoria.categoria" 
+                        :items="itemsCategorias" item-title="nombre" item-value="id" :error-messages="errorsSubCategorias.categoria"
+                        append-inner-icon="mdi-plus" @click:append-inner="cardSubcategoria=false, cardCategoria=true"></v-autocomplete></v-col>
+                    <v-col cols="12"><v-text-field label="Nombre" v-model="dataSubCategoria.nombre"
+                            :error-messages="errorsSubCategorias.nombre" variant="outlined"></v-text-field></v-col>
+                    <v-col cols="12"><v-textarea label="Descripción"
+                            v-model="dataSubCategoria.descripcion" variant="outlined"></v-textarea></v-col>
+                </v-row>
+            </v-card-text>
+            <v-card-actions>
+                <v-btn color="secondary" variant="tonal" @click="guardarSubcategoria">Guardar</v-btn>
+                <v-btn color="red" variant="tonal" @click="cardSubcategoria = false, limpiarSubCategoria(), card = true">Cancelar</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+    <!-- DIALOG PARA GUARDAR CATEGORÍAS -->
+    <v-dialog v-model="cardCategoria" persistent>
+        <v-card width="1000" class="mx-auto">
+            <v-card-title class="text-center">Registro de Categorías</v-card-title>
+            <v-card-text>
+                <v-row>
+                    <v-col cols="12"><v-text-field label="Nombre" v-model="dataCategoria.nombre"
+                            :error-messages="errorsCategoria.nombre" variant="outlined"></v-text-field></v-col>
+                    <v-col cols="12"><v-textarea label="Descripción"
+                            v-model="dataCategoria.descripcion" variant="outlined"></v-textarea></v-col>
+                </v-row>
+            </v-card-text>
+            <v-card-actions>
+                <v-btn color="secondary" variant="tonal" @click="guardarCategoria">Guardar</v-btn>
+                <v-btn color="red" variant="tonal" @click="cardCategoria = false, limpiarCategoria(), cardSubcategoria = true">Cancelar</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
 </template>
 <script>
 import Swal from 'sweetalert2';
@@ -110,14 +158,20 @@ export default {
                 { title: 'Descripción', key: 'descripcion', align: 'start' },
                 { title: 'Proveedor', key: 'proveedor.nombre', align: 'start' },
                 { title: 'Stock', key: 'stock', align: 'start' },
+                { title: 'Sub-Categoría', key: 'subcategoria.nombre', align: 'start' },
+                { title: 'Categoría', key: 'subcategoria.categoria.nombre', align: 'start' },
+                { title: 'Stock', key: 'stock', align: 'start' },
                 { title: 'Creado', key: 'created_at', align: 'center' },
                 { title: 'Última actualización', key: 'updated_at', align: 'center' },
                 { title: 'Opciones', key: 'actions', align: 'center' },
             ],
             itemsProductos: [],
             itemsProveedores: [],
+            itemsSubCategoria: [],
             card: false,
             cardProveedor: false,
+            cardSubcategoria: false,
+            cardCategoria: false,
             cardAction: '',
             search: '',
             dataSave: {
@@ -125,6 +179,7 @@ export default {
                 nombre: '',
                 descripcion: '',
                 proveedor: null,
+                subcategoria: null,
             },
             errors: {},
             errors2: {},
@@ -138,6 +193,20 @@ export default {
                 telefono: '',
                 email: '',
             },
+            dataSubCategoria: {
+                id: '',
+                nombre: '',
+                descripcion: '',
+                categoria: null,
+            },
+            itemsCategorias: [],
+            errorsSubCategorias: {},
+            dataCategoria: {
+                id: '',
+                nombre: '',
+                descripcion: '',
+            },
+            errorsCategoria: {}
         }
     },
     methods: {
@@ -177,11 +246,47 @@ export default {
                 });
             });
         },
+        getSubcategorias() {
+            this.overlay = true;
+            axios.get("/subcategorias").then(res => {
+                this.overlay = false;
+                this.itemsSubCategoria = res.data;
+            }).catch((err) => {
+                this.overlay = false;
+                Swal.fire({
+                    title: '¡Hubo un error al obtener datos!',
+                    icon: 'error',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#00A38C',
+                    customClass: {
+                        confirmButton: 'custom-confirm-button',
+                    }
+                });
+            });
+        },
+        getCategorias() {
+            this.overlay = true;
+            axios.get("/categorias").then(res => {
+                this.overlay = false;
+                this.itemsCategorias = res.data;
+            }).catch((err) => {
+                this.overlay = false;
+                Swal.fire({
+                    title: '¡Hubo un error al obtener datos!',
+                    icon: 'error',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#00A38C',
+                    customClass: {
+                        confirmButton: 'custom-confirm-button',
+                    }
+                });
+            });
+        },
         limpiar(){
             this.dataSave.nombre = '';
             this.dataSave.descripcion = '';
-            this.dataSave.categoria = '';
             this.dataSave.id = null;
+            this.dataSave.subcategoria = null;
             this.errors = {};
         },
         limpiar2(){
@@ -193,12 +298,25 @@ export default {
             this.dataSave2.id = null;
             this.errors2 = {};
         },
+        limpiarCategoria(){
+            this.dataCategoria.nombre = '';
+            this.dataCategoria.descripcion = '';
+            this.errorsCategoria = {};
+        },
+        limpiarSubCategoria(){
+            this.dataSubCategoria.nombre = '';
+            this.dataSubCategoria.descripcion = '';
+            this.dataSubCategoria.categoria = '';
+            this.dataSubCategoria.id = null;
+            this.errorsSubCategorias = {};
+        },
         guardar() {
             this.overlay = true;
             axios.post("/productos", {
                 nombre: this.dataSave.nombre,
                 descripcion: this.dataSave.descripcion,
                 proveedor: this.dataSave.proveedor,
+                subcategoria: this.dataSave.subcategoria,
             }).then(res => {
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
@@ -311,11 +429,72 @@ export default {
                     // Manejo de otros errores o código adicional
                 }
             });
+        },
+        guardarSubcategoria(){
+            this.overlay = true;
+            axios.post("/subcategorias", {
+                nombre: this.dataSubCategoria.nombre,
+                descripcion: this.dataSubCategoria.descripcion,
+                categoria: this.dataSubCategoria.categoria,
+            }).then(res => {
+                this.overlay = false;
+                toast.success("Se han guardado los datos", {
+                    autoClose: 3000,
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                });
+                this.limpiarSubCategoria();
+                this.getSubcategorias();
+                this.dataSave.subcategoria = res.data.data.id;
+                this.cardSubcategoria = false;
+                this.card = true;
+            }).catch((error) => {
+                this.overlay = false;
+                toast.error("¡Hubo un error al guardar los datos!", {
+                    autoClose: 3000,
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                });
+                if (error.response && error.response.status === 422) {
+                    this.errorsSubCategorias = error.response.data.errors;
+                } else {
+                    // Manejo de otros errores o código adicional
+                }
+            });
+        },
+        guardarCategoria(){
+            this.overlay = true;
+            axios.post("/categorias", {
+                nombre: this.dataCategoria.nombre,
+                descripcion: this.dataCategoria.descripcion,
+            }).then(res => {
+                this.overlay = false;
+                toast.success("Se han guardado los datos", {
+                    autoClose: 3000,
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                });
+                this.limpiarCategoria();
+                this.getCategorias();
+                this.dataSubCategoria.categoria = res.data.data.id;
+                this.cardCategoria = false;
+                this.cardSubcategoria = true;
+            }).catch((error) => {
+                this.overlay = false;
+                toast.error("¡Hubo un error al guardar los datos!", {
+                    autoClose: 3000,
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                });
+                if (error.response && error.response.status === 422) {
+                    this.errorsCategoria = error.response.data.errors;
+                } else {
+                    // Manejo de otros errores o código adicional
+                }
+            });
         }
     },
     mounted() {
         this.getData();
         this.getProveedores();
+        this.getSubcategorias();
+        this.getCategorias();
     }
 }
 </script>

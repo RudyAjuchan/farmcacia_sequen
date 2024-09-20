@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 class ProductosController extends Controller
 {
     public function index(){
-        return Producto::with(['proveedor'])->where('estado', 1)->get();
+        return Producto::with(['proveedor', 'subcategoria', 'subcategoria.categoria'])->where('estado', 1)->get();
     }
 
     public function store(Request $request){
@@ -17,6 +17,7 @@ class ProductosController extends Controller
             'nombre' => 'required|max:255',
             'proveedor' => 'required',
             'descripcion' => 'required',
+            'subcategoria' => 'required',
         ]);
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -29,6 +30,7 @@ class ProductosController extends Controller
                 $producto->nombre = $request->nombre;
                 $producto->descripcion = $request->descripcion;
                 $producto->proveedores_id = $request->proveedor;
+                $producto->subcategorias_id = $request->subcategoria;
                 $producto->stock = 0;
                 $producto->save();
                 return response()->json(['message' => 'Producto creado con éxito'], 201);

@@ -29,7 +29,7 @@ class subCategoriaController extends Controller
                 $subcategoria->descripcion = $request->descripcion;
                 $subcategoria->categorias_id = $request->categoria;
                 $subcategoria->save();
-                return response()->json(['message' => 'Categoría creada con éxito'], 201);
+                return response()->json(['message' => 'Categoría creada con éxito', 'data' => $subcategoria], 201);
             }catch (\Exception $e){
                 return response()->json(['error' => 'Error al guardar la categoría', 'details' => $e->getMessage()], 500);
             }

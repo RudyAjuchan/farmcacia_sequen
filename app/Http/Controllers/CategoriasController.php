@@ -29,7 +29,7 @@ class CategoriasController extends Controller
                 $categoria->nombre = $request->nombre;
                 $categoria->descripcion = $request->descripcion;
                 $categoria->save();
-                return response()->json(['message' => 'Categoría creada con éxito'], 201);
+                return response()->json(['message' => 'Categoría creada con éxito', 'data' => $categoria], 201);
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Error al guardar la categoría', 'details' => $e->getMessage()], 500);
             }
