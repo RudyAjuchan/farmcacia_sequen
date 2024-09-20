@@ -11,11 +11,11 @@ class Compra extends Model
 
     public function proveedor()
     {
-        return $this->belongsTo(Proveedores::class);
+        return $this->belongsTo(Proveedores::class, 'proveedores_id');
     }
 
     public function detalleCompras()
     {
-        return $this->hasMany(Detalle_compra::class);
+        return $this->hasMany(Detalle_compra::class, 'compras_id');
     }
 }

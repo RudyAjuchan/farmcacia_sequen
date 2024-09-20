@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('descripcion');
             $table->integer('stock')->default(0);
             $table->foreignId('proveedores_id')->constrained('proveedores');
+            $table->foreignId('subcategorias_id')->constrained('subcategorias');
             $table->integer('estado')->default(1);
             $table->timestamps();
         });

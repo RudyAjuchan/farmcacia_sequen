@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 class ComprasController extends Controller
 {
     public function index(){
-        return Compra::where('estado', 1)->get();
+        return Compra::with(['proveedor','detalleCompras'])->where('estado', 1)->get();
     }
 
     public function store(Request $request)
@@ -56,8 +56,8 @@ class ComprasController extends Controller
                 $detalle_compra->productos_id = $CAR['producto']['id'];
                 $detalle_compra->lote_productos_id = $lote->id;
                 $detalle_compra->save();
-                return response()->json(['message' => 'compra creada con éxito'], 201);
             }
+            return response()->json(['message' => 'compra creada con éxito'], 201);
 
         }
     }
