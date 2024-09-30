@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class ProductosController extends Controller
@@ -31,6 +32,7 @@ class ProductosController extends Controller
                 $producto->descripcion = $request->descripcion;
                 $producto->proveedores_id = $request->proveedor;
                 $producto->subcategorias_id = $request->subcategoria;
+                $producto->imagen = $request->imagen;
                 $producto->stock = 0;
                 $producto->save();
                 return response()->json(['message' => 'Producto creado con éxito'], 201);
@@ -57,7 +59,17 @@ class ProductosController extends Controller
                 $producto->nombre = $request->nombre;
                 $producto->descripcion = $request->descripcion;
                 $producto->proveedores_id = $request->proveedor;
-                $producto->stock = 0;
+                if($request->imagen !='' && $request->image_antigua!=''){
+                    if($request->imagen !='uploads/'.$request->image_antigua){
+                        Storage::disk('public')->delete('uploads/'.$request->image_antigua);
+                        $producto->imagen = $request->imagen;
+                    }
+                }else if($request->imagen =='' && $request->image_antigua!=''){
+                    Storage::disk('public')->delete('uploads/'.$request->image_antigua);
+                    $producto->imagen = null;
+                }else if($request->imagen !='' && $request->image_antigua==''){
+                    $producto->imagen = $request->imagen;
+                }
                 $producto->save();
                 return response()->json(['message' => 'Producto actualizado con éxito'], 201);
             }catch(\Exception $e){

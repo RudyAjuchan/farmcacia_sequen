@@ -7,6 +7,9 @@
         </div>
         <v-text-field variant="outlined" label="buscar" v-model="search"></v-text-field>
         <v-data-table :headers="headers" :items="itemsProductos" :search="search">
+            <template v-slot:[`item.imagen`]="{ item }">
+                <img width="60" :src="item.imagen ? `/storage/${item.imagen}` : '/storage/no-disponible.png'" alt="Imagen del producto" />
+            </template>
             <template v-slot:[`item.created_at`]="{ item }">
                 {{ new Date(item.created_at).toLocaleString() }}
             </template>
@@ -38,8 +41,16 @@
                     <v-col cols="12">
                         <v-text-field label="Nombre" v-model="dataSave.nombre"
                             :error-messages="errors.nombre" variant="outlined"></v-text-field></v-col>
-                    <v-col cols="12"><v-textarea label="Descripción"
+                    <v-col cols="6"><v-textarea label="Descripción"
                             v-model="dataSave.descripcion" variant="outlined" :error-messages="errors.descripcion"></v-textarea></v-col>
+                    <v-col cols="6">
+                        <file-pond name="file" ref="pond"
+                            label-idle='Arrastra tu archivo o <span class="filepond--label-action"> Sube uno </span>'
+                            :server="serverOptions" accepted-file-types="image/jpeg, image/png" allow-multiple="false"
+                            instant-upload="true" v-model="dataSave.imagen" :files="preloadedFiles"
+                            @removefile="handleRemoveFile"/>
+                    </v-col>
+
                 </v-row>
             </v-card-text>
             <v-card-actions>
@@ -149,8 +160,19 @@
 import Swal from 'sweetalert2';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
+/* Importaciones para manejo de imágenes */
+import vueFilePond from 'vue-filepond';
+import 'filepond/dist/filepond.min.css';
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+// Crear el componente FilePond con los plugins necesarios
+const FilePond = vueFilePond(FilePondPluginImagePreview, FilePondPluginFileValidateType);
 export default {
     name: 'subCategoriasVue',
+    components: {
+        FilePond,
+    },
     data() {
         return {
             headers: [
@@ -161,6 +183,7 @@ export default {
                 { title: 'Sub-Categoría', key: 'subcategoria.nombre', align: 'start' },
                 { title: 'Categoría', key: 'subcategoria.categoria.nombre', align: 'start' },
                 { title: 'Stock', key: 'stock', align: 'start' },
+                { title: 'Imagen', key: 'imagen', align: 'start' },
                 { title: 'Creado', key: 'created_at', align: 'center' },
                 { title: 'Última actualización', key: 'updated_at', align: 'center' },
                 { title: 'Opciones', key: 'actions', align: 'center' },
@@ -180,6 +203,7 @@ export default {
                 descripcion: '',
                 proveedor: null,
                 subcategoria: null,
+                imagen: '',
             },
             errors: {},
             errors2: {},
@@ -206,7 +230,44 @@ export default {
                 nombre: '',
                 descripcion: '',
             },
-            errorsCategoria: {}
+            errorsCategoria: {},
+
+            /* para manejo de imágenes */
+            serverOptions: {
+                process: {
+                    url: '/upload', // Ruta en Laravel
+                    method: 'POST',
+                    withCredentials: false,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    onload: response => {
+                        const responseData = JSON.parse(response);
+                        // Asigna la respuesta a `data.imagen`
+                        this.dataSave.imagen = responseData.fileId;
+                        return responseData.fileId;
+                    },
+                },
+                revert: (uniqueFileId, load, error) => {
+                    let imagenComparar = ''
+                    if(this.preloadedFiles.length>0){
+                        imagenComparar = this.preloadedFiles[0].image
+                    }
+                    if(uniqueFileId!=imagenComparar){
+                        axios.post(`/uploadDelete`,{ file: uniqueFileId })
+                            .then(response => load())
+                            .catch(err => error(err.message));
+                    }else{
+                        this.dataSave.imagen = ''
+                    }
+                },
+                load: (uniqueFileId, load) => {
+                fetch(uniqueFileId)
+                    .then(res => res.blob())
+                    .then(load);
+                },
+            },
+            preloadedFiles: [],
         }
     },
     methods: {
@@ -287,6 +348,7 @@ export default {
             this.dataSave.descripcion = '';
             this.dataSave.id = null;
             this.dataSave.subcategoria = null;
+            this.dataSave.imagen = '';
             this.errors = {};
         },
         limpiar2(){
@@ -317,6 +379,7 @@ export default {
                 descripcion: this.dataSave.descripcion,
                 proveedor: this.dataSave.proveedor,
                 subcategoria: this.dataSave.subcategoria,
+                imagen: this.dataSave.imagen,
             }).then(res => {
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
@@ -378,6 +441,18 @@ export default {
             this.dataSave.descripcion = item.descripcion;
             this.dataSave.proveedor = item.proveedor.id;
             this.dataSave.id = item.id;
+
+            if(item.imagen){
+                this.dataSave.imagen = item.imagen
+                const image = item.imagen.split("/")
+                this.preloadedFiles = [{
+                    source: `/storage/${item.imagen}`,
+                    options: {
+                        type: 'local',
+                    },
+                    image: image[1]
+                }];
+            }
         },
         guardarCambios(){
             this.overlay = true;
@@ -385,6 +460,8 @@ export default {
                 nombre: this.dataSave.nombre,
                 descripcion: this.dataSave.descripcion,
                 proveedor: this.dataSave.proveedor,
+                imagen: this.dataSave.imagen,
+                image_antigua: this.preloadedFiles[0] ? this.preloadedFiles[0].image: '',
             }).then(res => {
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
@@ -488,7 +565,10 @@ export default {
                     // Manejo de otros errores o código adicional
                 }
             });
-        }
+        },
+        handleRemoveFile(){
+            this.dataSave.imagen = ''
+        },
     },
     mounted() {
         this.getData();

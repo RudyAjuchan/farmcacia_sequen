@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\ComprasController;
+use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\proveedoresController;
 use App\Http\Controllers\subCategoriaController;
@@ -35,6 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('productos', ProductosController::class);
     /* RUTAS PARA COMPRAS */
     Route::apiResource('compras', ComprasController::class);
+    //RUTAS PARA SUBIR IMÀGENES
+    Route::post('/upload', [FileUploadController::class, 'store']);
+    Route::post('/uploadDelete', [FileUploadController::class, 'eliminarImagen']);
 });
 
 require __DIR__.'/auth.php';
