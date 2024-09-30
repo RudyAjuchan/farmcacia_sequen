@@ -520,6 +520,5 @@ export default {
 <style>
 .custom-confirm-button {
     color: #ffffff;
-    /* Cambia este valor por el color que desees */
 }
 </style>
