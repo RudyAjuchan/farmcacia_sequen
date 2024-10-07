@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 class ComprasController extends Controller
 {
     public function index(){
-        return Compra::with(['proveedor','detalleCompras'])->where('estado', 1)->get();
+        return Compra::with(['proveedor','detalleCompras','detalleCompras.producto', 'detalleCompras.loteProducto'])->where('estado', 1)->get();
     }
 
     public function store(Request $request)
@@ -59,6 +59,52 @@ class ComprasController extends Controller
             }
             return response()->json(['message' => 'compra creada con éxito'], 201);
 
+        }
+    }
+
+    public function update(Request $request, Compra $compra){
+        $validator = Validator::make($request->all(), [
+            'dataCompra' => 'required',
+            'dataDetalle' => 'required',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            if ($errors->isNotEmpty()) {
+                return response()->json(['errors' => $errors], 422);
+            }
+        } else {
+            $compra->fecha_compra = $request->dataCompra['fecha_compra'];
+            $compra->total = $request->dataCompra['total'];
+            $compra->proveedores_id = $request->dataCompra['proveedor'];
+            $compra->save();
+
+            //Ahora vamos a guardar en detalle de la compra y lotes
+            foreach($request->dataDetalle as  $CAR){
+                if($CAR["nuevo"]){
+                    //se inserta
+                }else{
+                    //se actualiza
+                    //PRIMERO LOS LOTES
+                    $lote = Lote_producto::where('id', $CAR['lote_id'])->first();
+                    $lote->cantidad = $CAR['cantidad'];
+                    $lote->fecha_compra = $request->dataCompra['fecha_compra'];
+                    $lote->cantidad_restante = $CAR['cantidad'];
+                    $lote->precio = $CAR['venta'];
+                    $lote->fecha_vencimiento = $CAR['fecha_vencimiento'];
+                    $lote->productos_id = $CAR['producto']['id'];
+                    $lote->save();
+
+                    $detalle_compra = Detalle_compra::where('id', $CAR['id'])->first();
+                    $detalle_compra->cantidad = $CAR['cantidad'];
+                    $detalle_compra->precio_unitario = $CAR['venta'];
+                    $detalle_compra->precio_compra = $CAR['compra'];
+                    $detalle_compra->compras_id = $compra->id;
+                    $detalle_compra->productos_id = $CAR['producto']['id'];
+                    $detalle_compra->lote_productos_id = $lote->id;
+                    $detalle_compra->save();
+                }
+            }
+            return response()->json(['message' => 'compra actualizada con éxito'], 201);
         }
     }
 }

@@ -182,7 +182,6 @@ export default {
                 { title: 'Stock', key: 'stock', align: 'start' },
                 { title: 'Sub-Categoría', key: 'subcategoria.nombre', align: 'start' },
                 { title: 'Categoría', key: 'subcategoria.categoria.nombre', align: 'start' },
-                { title: 'Stock', key: 'stock', align: 'start' },
                 { title: 'Imagen', key: 'imagen', align: 'start' },
                 { title: 'Creado', key: 'created_at', align: 'center' },
                 { title: 'Última actualización', key: 'updated_at', align: 'center' },

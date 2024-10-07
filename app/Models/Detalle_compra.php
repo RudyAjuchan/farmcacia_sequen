@@ -16,11 +16,11 @@ class Detalle_compra extends Model
 
     public function producto()
     {
-        return $this->belongsTo(Producto::class);
+        return $this->belongsTo(Producto::class, 'productos_id');
     }
 
     public function loteProducto()
     {
-        return $this->belongsTo(Lote_producto::class);
+        return $this->belongsTo(Lote_producto::class, 'lote_productos_id');
     }
 }

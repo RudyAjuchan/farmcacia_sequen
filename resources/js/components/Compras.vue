@@ -381,15 +381,32 @@ export default {
         editar(item) {
             this.card = true;
             this.cardAction = 'editar';
-            this.dataSave.nombre = item.nombre;
-            this.dataSave.descripcion = item.descripcion;
+            this.dataSave.fecha_compra = item.fecha_compra;
+            this.dataSave.total = item.total;
+            this.dataSave.proveedor = item.proveedor.id;
             this.dataSave.id = item.id;
+            this.total = item.total;
+            //LLENAR EL DETALLE
+            item.detalle_compras.forEach(dc => {
+                this.itemsDetalle.push({
+                    producto: dc.producto,
+                    cantidad: dc.cantidad,
+                    compra: dc.precio_compra,
+                    venta: dc.precio_unitario,
+                    fecha_vencimiento: dc.lote_producto.fecha_vencimiento,
+                    subtotal: parseFloat(dc.precio_compra)*parseInt(dc.cantidad),
+                    lote_id: dc.lote_producto.id,
+                    nuevo: false,
+                    id: dc.id,
+                });
+            });
         },
         guardarCambios(){
             this.overlay = true;
-            axios.put(`/categorias/${this.dataSave.id}`,{
-                nombre: this.dataSave.nombre,
-                descripcion: this.dataSave.descripcion,
+            this.dataSave.total = this.total;
+            axios.put(`/compras/${this.dataSave.id}`,{
+                dataCompra: this.dataSave,
+                dataDetalle: this.itemsDetalle,
             }).then(res => {
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
@@ -458,18 +475,20 @@ export default {
                             compra: parseFloat(this.dataSaveDetalle.compra),
                             venta: parseFloat(this.dataSaveDetalle.venta),
                             fecha_vencimiento: this.dataSaveDetalle.fecha_vencimiento,
-                            subtotal: (parseFloat(this.dataSaveDetalle.compra)*parseFloat(this.dataSaveDetalle.cantidad))
+                            subtotal: (parseFloat(this.dataSaveDetalle.compra)*parseFloat(this.dataSaveDetalle.cantidad)),
+                            nuevo: true,
                         })
                         this.index++;
                     }
                     this.total = this.itemsDetalle.reduce((sum, item) => sum + item.subtotal, 0);
                 }else{
-                    this.itemsDetalle[this.dataSaveDetalle.id].producto = producto;
-                    this.itemsDetalle[this.dataSaveDetalle.id].cantidad = this.dataSaveDetalle.cantidad;
-                    this.itemsDetalle[this.dataSaveDetalle.id].compra = this.dataSaveDetalle.compra;
-                    this.itemsDetalle[this.dataSaveDetalle.id].venta = this.dataSaveDetalle.venta;
-                    this.itemsDetalle[this.dataSaveDetalle.id].fecha_vencimiento = this.dataSaveDetalle.fecha_vencimiento;
-                    this.itemsDetalle[this.dataSaveDetalle.id].subtotal = (parseFloat(this.dataSaveDetalle.compra)*parseFloat(this.dataSaveDetalle.cantidad));
+                    const indexB = this.itemsDetalle.findIndex(itemsD => itemsD.id === this.dataSaveDetalle.id);
+                    this.itemsDetalle[indexB].producto = producto;
+                    this.itemsDetalle[indexB].cantidad = this.dataSaveDetalle.cantidad;
+                    this.itemsDetalle[indexB].compra = this.dataSaveDetalle.compra;
+                    this.itemsDetalle[indexB].venta = this.dataSaveDetalle.venta;
+                    this.itemsDetalle[indexB].fecha_vencimiento = this.dataSaveDetalle.fecha_vencimiento;
+                    this.itemsDetalle[indexB].subtotal = (parseFloat(this.dataSaveDetalle.compra)*parseFloat(this.dataSaveDetalle.cantidad));
                     this.total = this.itemsDetalle.reduce((sum, item) => sum + item.subtotal, 0);
                 }
                 this.dataSaveDetalle.producto = null;
