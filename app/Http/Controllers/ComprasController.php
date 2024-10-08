@@ -88,7 +88,6 @@ class ComprasController extends Controller
                     $lote = Lote_producto::where('id', $CAR['lote_id'])->first();
                     $lote->cantidad = $CAR['cantidad'];
                     $lote->fecha_compra = $request->dataCompra['fecha_compra'];
-                    $lote->cantidad_restante = $CAR['cantidad'];
                     $lote->precio = $CAR['venta'];
                     $lote->fecha_vencimiento = $CAR['fecha_vencimiento'];
                     $lote->productos_id = $CAR['producto']['id'];
@@ -106,5 +105,27 @@ class ComprasController extends Controller
             }
             return response()->json(['message' => 'compra actualizada con éxito'], 201);
         }
+    }
+
+    public function destroy(Compra $compra){
+        //cambiamos estado a la compra
+        $compra->estado = 0;
+        $compra->updated_at = now();
+        $compra->save();
+        
+        //cambiamos estado al detalle y al lote también
+        $detalle_compra = Detalle_compra::where('compras_id', $compra->id)->get();
+        foreach($detalle_compra as $DC){
+            $detalle = Detalle_compra::where('id', $DC->id)->first();
+            $detalle->estado = 0;
+            $detalle->updated_at = now();
+            $detalle->save();
+
+            $lote = Lote_producto::where('id', $detalle->lote_productos_id)->first();
+            $lote->estado = 0;
+            $lote->updated_at = now();
+            $lote->save();
+        }
+        return response()->json(['message' => 'compra eliminada con éxito'], 201);
     }
 }

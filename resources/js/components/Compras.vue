@@ -431,7 +431,7 @@ export default {
         },
         eliminar() {
             this.overlay = true;
-            axios.delete(`/categorias/${this.dataSave.id}`).then(res=>{
+            axios.delete(`/compras/${this.dataSave.id}`).then(res=>{
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
                     autoClose: 3000,

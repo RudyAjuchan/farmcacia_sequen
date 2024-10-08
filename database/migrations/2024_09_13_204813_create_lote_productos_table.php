@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('fecha_compra');
             $table->integer('cantidad_restante');
             $table->date('fecha_vencimiento');
+            $table->integer('estado')->default(1);
             $table->foreignId('productos_id')->constrained('productos');
             $table->timestamps();
         });
