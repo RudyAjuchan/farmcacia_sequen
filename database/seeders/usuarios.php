@@ -18,6 +18,7 @@ class usuarios extends Seeder
             'name' => 'Admin',
             'email' => 'farmacia@sequen.com',
             'password' => Hash::make('admin123'),
+            'role' => 'administrador',
             'created_at' => now(),
             'updated_at' => now(),
         ]);

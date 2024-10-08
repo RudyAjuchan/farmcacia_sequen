@@ -59,6 +59,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="/dashboard#/ventas">
+                        <span class="icon"><ion-icon name="cart-outline"></ion-icon></span>
+                        <span class="title">ventas</span>
+                    </a>
+                </li>
+                <li>
                     <a href="#">
                         <span class="icon"><ion-icon name="log-out-outline"></ion-icon></span>
                         <span class="title">Sign Out</span>
