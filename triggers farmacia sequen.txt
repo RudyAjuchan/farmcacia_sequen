@@ -1,0 +1,95 @@
+CREATE TRIGGER actualizar_stock_tras_compra
+AFTER INSERT ON lote_productos
+FOR EACH ROW
+   UPDATE productos
+   SET stock = stock + NEW.cantidad
+   WHERE productos.id = NEW.productos_id;
+
+CREATE TRIGGER reducir_stock_tras_venta
+AFTER INSERT ON detalle_ventas
+FOR EACH ROW
+   UPDATE productos
+   SET stock = stock - NEW.cantidad
+   WHERE id = NEW.productos_id;
+
+
+CREATE TRIGGER actualizar_lote_tras_venta
+AFTER INSERT ON detalle_ventas
+FOR EACH ROW
+   UPDATE lote_productos
+   SET cantidad_restante = cantidad_restante - NEW.cantidad
+   WHERE id = NEW.lote_productos_id;
+
+CREATE TRIGGER validar_stock_antes_venta
+BEFORE INSERT ON detalle_ventas
+FOR EACH ROW
+BEGIN
+   DECLARE stock_actual INT;
+   SELECT stock INTO stock_actual FROM productos WHERE id = NEW.productos_id;
+   
+   IF stock_actual < NEW.cantidad THEN
+       SIGNAL SQLSTATE '45000' 
+       SET MESSAGE_TEXT = 'No hay suficiente stock para realizar la venta';
+   END IF;
+END;
+
+
+
+CREATE TRIGGER desactivar_productos_vencidos
+BEFORE UPDATE ON lote_productos
+FOR EACH ROW
+BEGIN
+   IF NEW.fecha_vencimiento < CURDATE() THEN
+       SIGNAL SQLSTATE '45000'
+       SET MESSAGE_TEXT = 'El lote está vencido y no se puede vender';
+   END IF;
+END;
+
+
+CREATE TRIGGER ajustar_stock_tras_actualizacion_compra
+BEFORE UPDATE ON detalle_compras
+FOR EACH ROW
+BEGIN
+    DECLARE diferencia INT;
+
+    SET diferencia = NEW.cantidad - OLD.cantidad;
+
+    IF diferencia > 0 THEN
+        UPDATE productos
+        SET stock = stock + diferencia
+        WHERE id = NEW.productos_id;
+
+        UPDATE lote_productos
+        SET cantidad_restante = cantidad_restante + diferencia
+        WHERE productos_id = NEW.productos_id;
+  
+    ELSEIF diferencia < 0 THEN
+        UPDATE productos
+        SET stock = stock + diferencia
+        WHERE id = NEW.productos_id;
+
+        UPDATE lote_productos
+        SET cantidad_restante = cantidad_restante + diferencia
+        WHERE productos_id = NEW.productos_id;
+    END IF;
+END;
+
+CREATE TRIGGER after_soft_delete_compra
+AFTER UPDATE ON compras
+FOR EACH ROW
+BEGIN
+    -- Solo se ejecuta cuando el estado cambia de 1 a 0 (soft delete)
+    IF OLD.estado = 1 AND NEW.estado = 0 THEN
+        -- Para cada detalle de compra, actualizamos el stock del producto correspondiente
+        UPDATE productos p
+        JOIN detalle_compras dc ON p.id = dc.productos_id
+        SET p.stock = p.stock - dc.cantidad
+        WHERE dc.compras_id = NEW.id;
+
+        -- Ajustar la cantidad restante de los lotes relacionados con los detalles de compra
+        UPDATE lote_productos lp
+        JOIN detalle_compras dc ON lp.productos_id = dc.productos_id
+        SET lp.cantidad_restante = lp.cantidad_restante - dc.cantidad
+        WHERE dc.compras_id = NEW.id;
+    END IF;
+END;
