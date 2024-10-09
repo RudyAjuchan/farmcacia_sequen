@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\clientesController;
 use App\Http\Controllers\ComprasController;
 use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\loteProductoController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\proveedoresController;
 use App\Http\Controllers\subCategoriaController;
@@ -44,6 +45,8 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::apiResource('ventas', ventasController::class);
     /* RUTAS PARA CLIENTES */
     Route::apiResource('clientes', clientesController::class);
+    /* RUTAS PARA LOTE PRODUCTO */
+    Route::apiResource('loteProductos', loteProductoController::class);
     //RUTAS PARA SUBIR IMÀGENES
     Route::post('/upload', [FileUploadController::class, 'store']);
     Route::post('/uploadDelete', [FileUploadController::class, 'eliminarImagen']);

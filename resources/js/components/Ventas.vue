@@ -58,8 +58,8 @@
                                     </v-row>
                                 </v-form>
                                 <v-data-table :headers="headers2" :items="itemsDetalle">
-                                    <template v-slot:[`item.compra`]="{ item }">
-                                        {{ formato_numero(item.compra) }}
+                                    <template v-slot:[`item.precio`]="{ item }">
+                                        {{ formato_numero(item.precio) }}
                                     </template>
                                     <template v-slot:[`item.venta`]="{ item }">
                                         {{ formato_numero(item.venta) }}
@@ -151,15 +151,15 @@ export default {
     data() {
         return {
             headers: [
-                { title: 'Fecha compra', key: 'fecha_compra', align: 'start' },
+                { title: 'Fecha compra', key: 'created_at', align: 'start' },
                 { title: 'Total', key: 'total', align: 'start' },
                 { title: 'Hecha por', key: 'user.name', align: 'center' },
                 { title: 'Última actualización', key: 'updated_at', align: 'center' },
                 { title: 'Opciones', key: 'actions', align: 'center' },
             ],
             headers2: [
-                { title: 'Producto', key: 'producto.nombre', align: 'start' },
-                { title: 'Precio', key: 'compra', align: 'start' },
+                { title: 'Producto', key: 'producto.nombreAux', align: 'start' },
+                { title: 'Precio', key: 'precio', align: 'start' },
                 { title: 'Cantidad', key: 'cantidad', align: 'start' },
                 { title: 'Sub-total', key: 'subtotal', align: 'start' },
                 { title: 'Opciones', key: 'actions', align: 'center' },
@@ -244,7 +244,7 @@ export default {
         },
         getProductos() {
             this.overlay = true;
-            axios.get("/productos").then(res => {
+            axios.get("/loteProductos").then(res => {
                 this.overlay = false;
                 this.itemsProductos = res.data;
             }).catch((err) => {
@@ -262,7 +262,6 @@ export default {
         },
         limpiar(){
             this.dataSave.id = '';
-            this.dataSave.fecha_compra = '';
             this.dataSave.total = 0;
             this.dataSave.proveedor = '';
             this.errors = {};
@@ -280,9 +279,8 @@ export default {
         },
         guardar() {
             this.overlay = true;
-            axios.post("/compras", {
-                proveedor: this.dataSave.proveedor,
-                fecha_compra: this.dataSave.fecha_compra,
+            axios.post("/ventas", {
+                cliente: this.dataSave.cliente,
                 total: this.total,
                 carrito: this.itemsDetalle,
             }).then(res => {
@@ -434,44 +432,68 @@ export default {
 
             if(result.valid){
                 const producto = this.itemsProductos.find(p => p.id === this.dataSaveDetalle.producto);
-                console.log(this.itemsDetalle.id);
                 if(this.dataSaveDetalle.id==null){
                     const busquedaCarrito = this.itemsDetalle.find(c => c.producto.id === producto.id);
                     if(busquedaCarrito!==undefined){
-                        this.itemsDetalle[busquedaCarrito.id].cantidad+=parseInt(this.dataSaveDetalle.cantidad);
-                        this.itemsDetalle[busquedaCarrito.id].compra=parseInt(this.dataSaveDetalle.compra);
-                        this.itemsDetalle[busquedaCarrito.id].venta=parseInt(this.dataSaveDetalle.venta);
-                        this.itemsDetalle[busquedaCarrito.id].fecha_vencimiento=parseInt(this.dataSaveDetalle.fecha_vencimiento);
-                        this.itemsDetalle[busquedaCarrito.id].subtotal=(parseFloat(this.itemsDetalle[busquedaCarrito.id].compra)*parseFloat(this.itemsDetalle[busquedaCarrito.id].cantidad));
+                        console.log(parseInt(this.itemsDetalle[busquedaCarrito.id].cantidad) + parseInt(this.dataSaveDetalle.cantidad));
+                        if((parseInt(this.itemsDetalle[busquedaCarrito.id].cantidad) + parseInt(this.dataSaveDetalle.cantidad)) <= producto.cantidad_restante){
+                            this.itemsDetalle[busquedaCarrito.id].cantidad = parseInt(this.itemsDetalle[busquedaCarrito.id].cantidad);
+                            this.itemsDetalle[busquedaCarrito.id].cantidad+=parseInt(this.dataSaveDetalle.cantidad);
+                            this.itemsDetalle[busquedaCarrito.id].precio=producto.precio;
+                            this.itemsDetalle[busquedaCarrito.id].subtotal=(parseFloat(producto.precio)*parseFloat(this.itemsDetalle[busquedaCarrito.id].cantidad));
+                        }else{
+                            this.card = false;
+                            Swal.fire({
+                                title: '¡No tenemos suficientes para vender!',
+                                text: `Solo tenemos ${producto.cantidad_restante} para vender`,
+                                icon: 'warning',
+                                allowOutsideClick: false,
+                                confirmButtonColor: '#00A38C',
+                                customClass: {
+                                    confirmButton: 'custom-confirm-button',
+                                }
+                            }).then(response => {
+                                this.card = true;
+                            })
+                        }
                     }else{
-                        this.itemsDetalle.push({
-                            id: this.index,
-                            producto: producto,
-                            cantidad: parseInt(this.dataSaveDetalle.cantidad),
-                            compra: parseFloat(this.dataSaveDetalle.compra),
-                            venta: parseFloat(this.dataSaveDetalle.venta),
-                            fecha_vencimiento: this.dataSaveDetalle.fecha_vencimiento,
-                            subtotal: (parseFloat(this.dataSaveDetalle.compra)*parseFloat(this.dataSaveDetalle.cantidad)),
-                            nuevo: true,
-                        })
-                        this.index++;
+                        if(this.dataSaveDetalle.cantidad <= producto.cantidad_restante){
+                            this.itemsDetalle.push({
+                                id: this.index,
+                                producto: producto,
+                                cantidad: this.dataSaveDetalle.cantidad,
+                                precio: producto.precio,
+                                subtotal: (parseFloat(producto.precio)*parseFloat(this.dataSaveDetalle.cantidad)),
+                                nuevo: true,
+                            })
+                            this.index++;
+                        }else{
+                            this.card = false;
+                            Swal.fire({
+                                title: '¡No tenemos suficientes para vender!',
+                                text: `Solo tenemos ${producto.cantidad_restante} para vender`,
+                                icon: 'warning',
+                                allowOutsideClick: false,
+                                confirmButtonColor: '#00A38C',
+                                customClass: {
+                                    confirmButton: 'custom-confirm-button',
+                                }
+                            }).then(response => {
+                                this.card = true;
+                            })
+                        }
                     }
                     this.total = this.itemsDetalle.reduce((sum, item) => sum + item.subtotal, 0);
                 }else{
                     const indexB = this.itemsDetalle.findIndex(itemsD => itemsD.id === this.dataSaveDetalle.id);
                     this.itemsDetalle[indexB].producto = producto;
                     this.itemsDetalle[indexB].cantidad = this.dataSaveDetalle.cantidad;
-                    this.itemsDetalle[indexB].compra = this.dataSaveDetalle.compra;
-                    this.itemsDetalle[indexB].venta = this.dataSaveDetalle.venta;
-                    this.itemsDetalle[indexB].fecha_vencimiento = this.dataSaveDetalle.fecha_vencimiento;
-                    this.itemsDetalle[indexB].subtotal = (parseFloat(this.dataSaveDetalle.compra)*parseFloat(this.dataSaveDetalle.cantidad));
+                    this.itemsDetalle[indexB].precio = producto.precio;
+                    this.itemsDetalle[indexB].subtotal = (parseFloat(producto.precio)*parseFloat(this.dataSaveDetalle.cantidad));
                     this.total = this.itemsDetalle.reduce((sum, item) => sum + item.subtotal, 0);
                 }
                 this.dataSaveDetalle.producto = null;
                 this.dataSaveDetalle.cantidad = null;
-                this.dataSaveDetalle.compra = null;
-                this.dataSaveDetalle.venta = null;
-                this.dataSaveDetalle.fecha_vencimiento = null;
                 this.dataSaveDetalle.id = null;
             }else{
                 this.card = false;
@@ -495,9 +517,6 @@ export default {
         editarCarrito(item){
             this.dataSaveDetalle.producto = item.producto.id;
             this.dataSaveDetalle.cantidad = item.cantidad;
-            this.dataSaveDetalle.compra = item.compra;
-            this.dataSaveDetalle.venta = item.venta;
-            this.dataSaveDetalle.fecha_vencimiento = item.fecha_vencimiento;
             this.dataSaveDetalle.id = item.id;
         },
         eliminarCarrito(item){
