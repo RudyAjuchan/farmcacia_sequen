@@ -93,3 +93,28 @@ BEGIN
         WHERE dc.compras_id = NEW.id;
     END IF;
 END;
+
+DELIMITER $$
+
+CREATE TRIGGER after_soft_delete_venta
+AFTER UPDATE ON ventas
+FOR EACH ROW
+BEGIN
+    -- Solo se ejecuta cuando el estado cambia de 1 a 0 (soft delete)
+    IF OLD.estado = 1 AND NEW.estado = 0 THEN
+        -- Para cada detalle de venta, actualizamos el stock del producto correspondiente
+        UPDATE productos p
+        JOIN detalle_ventas dv ON p.id = dv.productos_id
+        SET p.stock = p.stock + dv.cantidad
+        WHERE dv.ventas_id = NEW.id;
+
+        -- Ajustar la cantidad restante de los lotes relacionados con los detalles de venta
+        UPDATE lote_productos lp
+        JOIN detalle_ventas dv ON lp.productos_id = dv.productos_id
+        SET lp.cantidad_restante = lp.cantidad_restante + dv.cantidad
+        WHERE dv.ventas_id = NEW.id;
+    END IF;
+END$$
+
+DELIMITER ;
+

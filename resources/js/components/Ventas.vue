@@ -14,8 +14,7 @@
                 {{ new Date(item.updated_at).toLocaleString() }}
             </template>
             <template v-slot:[`item.actions`]="{ item }">
-                <v-btn color="secondary" class="me-2" variant="tonal" @click="editar(item)"><i
-                        class="fa-solid fa-pen"></i></v-btn>
+                <v-btn color="secondary" class="me-2" variant="tonal" @click="viewDetalle(item)"><i class="fa-solid fa-eye"></i></v-btn>
                 <v-btn color="red" variant="tonal" @click="dialogEliminar=true, dataSave.id = item.id"><i
                         class="fa-solid fa-trash"></i></v-btn>
             </template>
@@ -141,6 +140,89 @@
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <v-dialog v-model="cardDetalle">
+        <v-card width="1000" class="mx-auto">
+            <v-card-title>Detalle de la venta</v-card-title>
+            <v-card-text>
+                <v-row>
+                    <v-col cols="12">
+                        <p><b>No Recibo:</b> {{ itemDetalle.id }}</p>
+                        <p><b>Fecha compra:</b> {{ new Date(itemDetalle.created_at).toLocaleString() }}</p>
+                        <p><b>Cliente:</b> {{ itemDetalle.cliente.name }}</p>
+                        <p><b>Telefono:</b> {{ itemDetalle.cliente.telefono==null ? 'sin datos' : itemDetalle.cliente.telefono}}</p>
+                        <p><b>NIT:</b> {{ itemDetalle.cliente.nit==null ? 'sin datos' : itemDetalle.cliente.nit}}</p>
+                        <p><b>Correo:</b> {{ itemDetalle.cliente.email==null ? 'sin datos' : itemDetalle.cliente.email}}</p>
+                        <p><b>Dirección:</b> {{ itemDetalle.cliente.direccion==null ? 'sin datos' : itemDetalle.cliente.direccion}}</p>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-table>
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Precio</th>
+                                    <th>Cantidad</th>
+                                    <th>Sub-total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="detalle in itemDetalle.detalle_ventas" :key="detalle.index">
+                                    <td>{{ detalle.producto.nombre }}</td>
+                                    <td>{{ formato_numero(detalle.precio_unitario) }}</td>
+                                    <td>{{ detalle.cantidad }}</td>
+                                    <td>{{ formato_numero(detalle.subtotal) }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3"><b style="color: red;">Total</b></td>
+                                    <td><b style="color: red;">{{ formato_numero(itemDetalle.total) }}</b></td>
+                                </tr>
+                            </tbody>
+                        </v-table>
+                    </v-col>
+                </v-row>
+                <v-row id="tabla-detalle" v-show="false">
+                    <v-col cols="12">
+                        <p><b>No Recibo:</b> {{ itemDetalle.id }}</p>
+                        <p><b>Fecha compra:</b> {{ new Date(itemDetalle.created_at).toLocaleString() }}</p>
+                        <p><b>Cliente:</b> {{ itemDetalle.cliente.name }}</p>
+                        <p><b>Telefono:</b> {{ itemDetalle.cliente.telefono==null ? 'sin datos' : itemDetalle.cliente.telefono}}</p>
+                        <p><b>NIT:</b> {{ itemDetalle.cliente.nit==null ? 'sin datos' : itemDetalle.cliente.nit}}</p>
+                        <p><b>Correo:</b> {{ itemDetalle.cliente.email==null ? 'sin datos' : itemDetalle.cliente.email}}</p>
+                        <p><b>Dirección:</b> {{ itemDetalle.cliente.direccion==null ? 'sin datos' : itemDetalle.cliente.direccion}}</p>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-table density="compact">
+                            <thead>
+                                <tr>
+                                    <th style="font-weight: bold; border-bottom: solid 1px black !important;">Producto</th>
+                                    <th style="font-weight: bold; border-bottom: solid 1px black !important;">Precio</th>
+                                    <th style="font-weight: bold; border-bottom: solid 1px black !important;">Cantidad</th>
+                                    <th style="font-weight: bold; border-bottom: solid 1px black !important;">Sub-total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="detalle in itemDetalle.detalle_ventas" :key="detalle.index">
+                                    <td style="border-bottom: solid 1px gray !important;">{{ detalle.producto.nombre }}</td>
+                                    <td style="border-bottom: solid 1px gray !important;">{{ formato_numero(detalle.precio_unitario) }}</td>
+                                    <td style="border-bottom: solid 1px gray !important;">{{ detalle.cantidad }}</td>
+                                    <td style="border-bottom: solid 1px gray !important;">{{ formato_numero(detalle.subtotal) }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="border-bottom: solid 1px gray !important;"><b style="color: red;">Total</b></td>
+                                    <td style="border-bottom: solid 1px gray !important;"><b style="color: red;">{{ formato_numero(itemDetalle.total) }}</b></td>
+                                </tr>
+                            </tbody>
+                        </v-table>
+                        <p class="text-end mt-10"><b>Venta hecha por: </b>{{ itemDetalle.user.name }}</p>
+                    </v-col>
+                </v-row>
+            </v-card-text>
+            <v-card-actions>
+                <v-btn color="secondary" variant="tonal"  @click="descargarPDF('tabla-detalle')">Imprimir</v-btn>
+                <v-btn color="red" variant="tonal" @click="cardDetalle = false">Cancelar</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 <script>
 import Swal from 'sweetalert2';
@@ -151,7 +233,9 @@ export default {
     data() {
         return {
             headers: [
+                { title: 'No. venta', key: 'id', align: 'start' },
                 { title: 'Fecha compra', key: 'created_at', align: 'start' },
+                { title: 'Cliente', key: 'cliente.name', align: 'start' },
                 { title: 'Total', key: 'total', align: 'start' },
                 { title: 'Hecha por', key: 'user.name', align: 'center' },
                 { title: 'Última actualización', key: 'updated_at', align: 'center' },
@@ -203,6 +287,8 @@ export default {
             ],
             index: 0,
             total: 0,
+            cardDetalle: false,
+            itemDetalle: [],
         }
     },
     methods: {
@@ -353,66 +439,22 @@ export default {
             });
         },
         editar(item) {
-            this.card = true;
-            this.cardAction = 'editar';
-            this.dataSave.fecha_compra = item.fecha_compra;
-            this.dataSave.total = item.total;
-            this.dataSave.proveedor = item.proveedor.id;
-            this.dataSave.id = item.id;
-            this.total = item.total;
-            //LLENAR EL DETALLE
-            item.detalle_compras.forEach(dc => {
-                this.itemsDetalle.push({
-                    producto: dc.producto,
-                    cantidad: dc.cantidad,
-                    compra: dc.precio_compra,
-                    venta: dc.precio_unitario,
-                    fecha_vencimiento: dc.lote_producto.fecha_vencimiento,
-                    subtotal: parseFloat(dc.precio_compra)*parseInt(dc.cantidad),
-                    lote_id: dc.lote_producto.id,
-                    nuevo: false,
-                    id: dc.id,
-                });
-            });
+            
         },
         guardarCambios(){
-            this.overlay = true;
-            this.dataSave.total = this.total;
-            axios.put(`/compras/${this.dataSave.id}`,{
-                dataCompra: this.dataSave,
-                dataDetalle: this.itemsDetalle,
-            }).then(res => {
-                this.overlay = false;
-                toast.success("Se han guardado los datos", {
-                    autoClose: 3000,
-                    position: toast.POSITION.BOTTOM_RIGHT,
-                });
-                this.limpiar();
-                this.card = false;
-                this.getData();
-            }).catch((error) => {
-                this.overlay = false;
-                toast.error("¡Hubo un error al guardar cambios a los datos!", {
-                    autoClose: 3000,
-                    position: toast.POSITION.BOTTOM_RIGHT,
-                });
-                if (error.response && error.response.status === 422) {
-                    this.errors = error.response.data.errors;
-                } else {
-                    // Manejo de otros errores o código adicional
-                }
-            });
+            
         },
         eliminar() {
             this.overlay = true;
-            axios.delete(`/compras/${this.dataSave.id}`).then(res=>{
+            axios.delete(`/ventas/${this.dataSave.id}`).then(res=>{
                 this.overlay = false;
-                toast.success("Se han guardado los datos", {
+                toast.success("Se han guardado los cambios", {
                     autoClose: 3000,
                     position: toast.POSITION.BOTTOM_RIGHT,
                 });
                 this.dialogEliminar = false;
                 this.getData();
+                this.getProductos();
             }).catch((error) => {
                 this.overlay = false;
                 toast.error("¡Hubo un error al eliminar los datos!", {
@@ -522,7 +564,20 @@ export default {
         eliminarCarrito(item){
             this.itemsDetalle = this.itemsDetalle.filter(c => c.id!==item.id);
             this.total = this.itemsDetalle.reduce((sum, item) => sum + item.subtotal, 0);
-        }
+        },
+        viewDetalle(item){
+            this.cardDetalle = true;
+            console.log(item);
+            this.itemDetalle = item;
+        },
+        async descargarPDF(id) {
+            this.imprimir = true;
+            this.$htmlToPaper(id)
+
+            this.$nextTick(() => {
+                this.imprimir = false;
+            })
+        },
     },
     mounted() {
         this.getData();

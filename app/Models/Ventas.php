@@ -14,6 +14,11 @@ class Ventas extends Model
         return $this->belongsTo(User::class, 'users_id');
     }
 
+    public function cliente()
+    {
+        return $this->belongsTo(User::class, 'clientes_id');
+    }
+
     public function detalleVentas()
     {
         return $this->hasMany(Detalle_venta::class, 'ventas_id');

@@ -24,6 +24,20 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import VueHtmlToPaper from 'vue-html-to-paper';
+const options = {
+    name: 'Imprimir',
+    specs: [
+        'fullscreen=yes',
+        'titlebar=yes',
+        'scrollbars=yes'
+    ],
+    styles: [
+        'https://cdn.jsdelivr.net/npm/vuetify@3.3.23/dist/vuetify.min.css'
+    ],
+    autoClose: true,
+    windowTitle: window.document.title,
+}
 
 const vuetify = createVuetify({
     components,
@@ -46,4 +60,5 @@ const app = createApp({
 
 app.use(RouterWeb);
 app.use(vuetify);
+app.use(VueHtmlToPaper, options);
 app.mount('#app');

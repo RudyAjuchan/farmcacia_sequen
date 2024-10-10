@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class ventasController extends Controller
 {
     public function index(){
-        return Ventas::with(['user', 'detalleVentas', 'detalleVentas.producto', 'detalleVentas.loteProducto'])->where('estado', 1)->get();
+        return Ventas::with(['user', 'cliente', 'detalleVentas', 'detalleVentas.producto', 'detalleVentas.loteProducto'])->where('estado', 1)->get();
     }
 
     public function store(Request $request){
@@ -25,9 +25,10 @@ class ventasController extends Controller
             }
         } else {
             //Guardamos primero la venta
+            
             $venta = new Ventas();
             $venta->total = $request->total;
-            $venta->users_id = session('id');
+            $venta->users_id = auth()->user()->id;
             $venta->clientes_id = $request->cliente;
             $venta->save();
 
@@ -45,5 +46,23 @@ class ventasController extends Controller
             return response()->json(['message' => 'Venta hecha con éxito'], 201);
             
         }
+    }
+
+    public function destroy(Ventas $venta){
+        //Primero cambiamos el estado a la venta
+        $venta->estado = 0;
+        $venta->updated_at = now();
+        $venta->save();
+
+        //Ahora el detalle de la venta
+        $detalle_venta = Detalle_venta::where('ventas_id', $venta->id)->get();
+        foreach($detalle_venta as $DV){
+            $detalle = Detalle_venta::where('id', $DV->id)->first();
+            $detalle->estado = 0;
+            $detalle->updated_at = now();
+            $detalle->save();
+        }
+
+        return response()->json(['message' => 'Venta cancelada con éxito'], 201);
     }
 }
