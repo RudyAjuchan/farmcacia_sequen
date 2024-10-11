@@ -1,0 +1,136 @@
+<template>
+    <div>
+        <navBar :logo="imgLogo"></navBar>
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="row h-100 justify-content-center align-items-center">
+                <div class="col-md-5 text-center">
+                    <h1 style="color: white;"><b>Bienvenido a Farmacia Sequén</b></h1>
+                    <p style="font-size: 1.2rem; color: white;">Cuidamos de tu salud con productos de calidad</p>
+                    <a href="#" class="btn btn-success">Ver productos</a>
+                </div>
+            </div>
+        </section>
+        <div class="container">
+            <h2 class="my-4 text-center"><b>Productos Destacados</b></h2>
+            <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
+                :pagination="{ clickable: true, }" :modules="modules" class="mySwiper py-5">
+                <swiper-slide  v-for="(product, index) in products" :key="index">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <img :src="product.img" :alt="product.name" class="mx-auto mb-4" />
+                            <h3>{{ product.name }}</h3>
+                            <p>{{ product.description }}</p>
+                            <a href="#" class="btn btn-success">Comprar</a>
+                        </div>
+                    </div>
+                </swiper-slide>
+            </swiper>
+        </div>
+
+        <!-- SERVICIOS -->
+        <section class="servicios">
+            <div class="container h-100">
+                <div class="row h-100 justify-content-center align-items-center">
+                    <h1 class="text-center"><b>Nuestros servicios</b></h1>
+                    <div class="col-md-4 text-center" v-for="(service, index) in services" :key="index">
+                        <h3>{{ service.title }}</h3>
+                        <p>{{ service.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PIE -->
+        <Footer></Footer>
+    </div>
+</template>
+<script>
+import { Swiper, SwiperSlide } from 'swiper/vue';
+// import required modules
+import { Navigation, FreeMode, Pagination } from 'swiper/modules';
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+
+import navBar from './subcomponents/navBar.vue'
+import Footer from './subcomponents/footer.vue'
+export default {
+    name: 'inicioVUe',
+    components: {
+        navBar,
+        Footer,
+        Swiper,
+        SwiperSlide,
+    },
+    data() {
+        return {
+            isMenuOpen: false,
+            products: [
+                { name: 'Producto 1', description: 'Lorem ipsum dolor sit amet.', img: 'https://via.placeholder.com/150' },
+                { name: 'Producto 2', description: 'Lorem ipsum dolor sit amet.', img: 'https://via.placeholder.com/150' },
+                { name: 'Producto 3', description: 'Lorem ipsum dolor sit amet.', img: 'https://via.placeholder.com/150' },
+                { name: 'Producto 4', description: 'Lorem ipsum dolor sit amet.', img: 'https://via.placeholder.com/150' },
+            ],
+            services: [
+                { title: 'Entrega a domicilio', description: 'Recibe tus productos en la comodidad de tu hogar' },
+                { title: 'Consultas Médicas', description: 'Consulta a nuestros especialistas en salud.' },
+                { title: 'Asesoramiento Farmacéutico', description: 'Te ayudamos a escoger los productos correctos.' },
+            ],
+            imgLogo: "/images/image.png",
+            modules: [FreeMode, Pagination, Navigation],
+        }
+    },
+    methods: {
+    },
+    mounted() {
+    }
+}
+</script>
+<style scoped>
+body {
+    font-family: 'Inter', sans-serif;
+    font-optical-sizing: auto;
+}
+
+.hero {
+    height: 300px;
+    background-image: url('/images/farmacia.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.servicios {
+    height: 300px;
+    background-color: #ccfbf1;
+}
+
+h1 {
+    color: #0f766e;
+}
+
+.btn-success {
+    background-color: #0f766e;
+}
+
+.btn-success:hover {
+    background-color: #0d5e57;
+}
+
+h2 {
+    color: #00a38c;
+}
+
+h3 {
+    color: #0f766e;
+}
+
+.swiper-pagination {
+    bottom: 0px !important;
+}
+</style>

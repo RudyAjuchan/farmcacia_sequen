@@ -14,8 +14,12 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\RoleRedirect;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+Route::get('/admin', function () {
     return view('login');
+});
+
+Route::get('/', function () {
+    return view('ecommerce');
 });
 
 Route::get('/login', function () {
