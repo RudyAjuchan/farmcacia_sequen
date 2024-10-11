@@ -23,8 +23,8 @@ class RoleRedirect
             // Redirigir dependiendo del rol del usuario
             if ($user->role === 'administrador' && !$request->routeIs('dashboard')) {
                 return redirect()->route('dashboard');
-            } elseif ($user->role === 'cliente' && !$request->routeIs('/')) {
-                return redirect()->route('/');
+            } elseif ($user->role === 'cliente' && !$request->routeIs('home')) {
+                return redirect()->route('home');
             }
         }
 

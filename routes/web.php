@@ -17,14 +17,24 @@ use Illuminate\Support\Facades\Route;
 Route::get('/admin', function () {
     return view('login');
 });
+Route::get('/signing_up', function () {
+    return view('register');
+});
+Route::get('/log_in', function () {
+    return view('login_cliente');
+});
 
 Route::get('/', function () {
     return view('ecommerce');
-});
+})->name('home');
 
 Route::get('/login', function () {
     return redirect('/');
 });
+
+Route::get('/user', function () {
+    return response()->json(auth()->user());
+})->name('user');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

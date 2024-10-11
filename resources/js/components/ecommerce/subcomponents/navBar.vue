@@ -31,7 +31,13 @@
                         </div>
                     </div>
                     <div class="text-center d-none d-lg-block">
-                        <a href="#" class="btn btn-light">Iniciar Sesión</a>
+                        <template v-if="user">
+                            <span class="text-white">Hola, {{ user.name }}</span> &nbsp;
+                            <button class="btn btn-light" @click="logout">Cerrar Sesión</button>
+                        </template>
+                        <template v-else>
+                            <a href="/log_in" class="btn btn-light">Iniciar Sesión</a>
+                        </template>
                     </div>
                 </div>
             </nav>
@@ -50,11 +56,34 @@ export default {
     data() {
         return {
             isMenuOpen: false,
+            user: null,
         }
     },
     methods: {
+        toggleMenu() {
+            this.isMenuOpen = !this.isMenuOpen;
+        },
+        getUser(){
+            axios.get('/user').then(res => {
+                this.user = res.data.length>0 ? res.data : null ;
+                console.log(this.user)
+            }).catch(error => {
+                console.error('Error fetching user:', error);
+            });
+        },
+        logout() {
+            axios.post('/logout')
+                .then(() => {
+                    this.user = null;  // Elimina los datos del usuario en el frontend
+                    window.location.href = '/';  // Redirige al usuario a la página principal
+                })
+                .catch(error => {
+                    console.error('Error logging out:', error);
+                });
+        }
     },
     mounted() {
+        this.getUser();
     }
 }
 </script>

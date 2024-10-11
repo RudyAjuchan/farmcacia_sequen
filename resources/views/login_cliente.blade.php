@@ -52,6 +52,9 @@
                 <a href="{{ route('password.request') }}" class="text-sm text-secondary hover:underline">¿Olvidaste tu contraseña?</a>
                 @endif
             </div> --}}
+            <div class="mt-6 text-center">
+                <a href="/signing_up" class="text-sm text-secondary hover:underline">¿No tienes cuenta? Registrate aquí</a>
+            </div>
         </form>
     </div>
 </body>
