@@ -26,7 +26,7 @@ class Producto extends Model
 
     public function detalleVentas()
     {
-        return $this->hasMany(Detalle_venta::class);
+        return $this->hasMany(Detalle_venta::class, 'productos_id')->where('estado', 1);
     }
 
     public function detalleCompras()

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\clientesController;
 use App\Http\Controllers\ComprasController;
+use App\Http\Controllers\ecommerceController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\loteProductoController;
 use App\Http\Controllers\ProductosController;
@@ -65,5 +66,12 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::post('/upload', [FileUploadController::class, 'store']);
     Route::post('/uploadDelete', [FileUploadController::class, 'eliminarImagen']);
 });
+
+/* RUTAS PÚBLICAS */
+Route::get('/productosDestacadas', [ecommerceController::class, 'productosDestacados'])->name('productos.destacados');
+Route::get('/productosRecientes', [ecommerceController::class, 'productosRecientes'])->name('productos.recientes');
+Route::get('/categoriasEcomemrce', [ecommerceController::class, 'categoriasEcomemrce'])->name('categorias.ecommerce');
+Route::get('/subCategoriasEcommerce', [ecommerceController::class, 'subCategoriasEcommerce'])->name('subcategorias.ecommerce');
+
 
 require __DIR__.'/auth.php';

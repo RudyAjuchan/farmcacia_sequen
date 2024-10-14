@@ -72,6 +72,7 @@
 <script>
 import navBar from './subcomponents/navBar.vue'
 import Footer from './subcomponents/footer.vue'
+import Swal from 'sweetalert2';
 export default {
     name: 'productosVue',
     components:{
@@ -81,19 +82,8 @@ export default {
     data() {
         return {
             imgLogo: "/images/image.png",
-            categorias: [
-                'Medicamentos',
-                'Suplementos',
-                'Cuidado personal',
-                'Cuidado infantil',
-                'Equipos médicos'
-            ],
-            subcategorias: [
-                'Analgésicos',
-                'Antibióticos',
-                'Vitaminas',
-                'Jabones'
-            ],
+            categorias: [],
+            subcategorias: [],
             productos: [
                 {
                     id: 1,
@@ -120,6 +110,38 @@ export default {
         }
     },
     methods: {
+        categorias(){
+            axios.get("/categoriasEcomemrce").then(res => {
+                this.categorias = res.data
+            }).catch((err) => {
+                this.overlay = false;
+                Swal.fire({
+                    title: '¡Hubo un error al obtener datos!',
+                    icon: 'error',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#00A38C',
+                    customClass: {
+                        confirmButton: 'custom-confirm-button',  // Clase personalizada
+                    }
+                });
+            });
+        },
+        subcategorias(){
+            axios.get("/categoriasEcomemrce").then(res => {
+                this.subcategorias = res.data
+            }).catch((err) => {
+                this.overlay = false;
+                Swal.fire({
+                    title: '¡Hubo un error al obtener datos!',
+                    icon: 'error',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#00A38C',
+                    customClass: {
+                        confirmButton: 'custom-confirm-button',  // Clase personalizada
+                    }
+                });
+            });
+        },
         agregarAlCarrito(producto) {
             // Lógica para agregar producto al carrito
             console.log('Agregando al carrito:', producto);
@@ -133,6 +155,8 @@ export default {
         }
     },
     mounted() {
+        this.categorias();
+        this.subcategorias();
     }
 }
 </script>

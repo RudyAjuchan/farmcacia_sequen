@@ -8,10 +8,11 @@
                 <div class="col-md-5 text-center">
                     <h1 style="color: white;"><b>Bienvenido a Farmacia Sequén</b></h1>
                     <p style="font-size: 1.2rem; color: white;">Cuidamos de tu salud con productos de calidad</p>
-                    <a href="#" class="btn btn-success">Ver productos</a>
+                    <a href="#/productos" class="btn btn-success">Ver productos</a>
                 </div>
             </div>
         </section>
+
         <div class="container">
             <h2 class="my-4 text-center"><b>Productos Destacados</b></h2>
             <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
@@ -19,9 +20,26 @@
                 <swiper-slide  v-for="(product, index) in products" :key="index">
                     <div class="card text-center">
                         <div class="card-body">
-                            <img :src="product.img" :alt="product.name" class="mx-auto mb-4" />
-                            <h3>{{ product.name }}</h3>
-                            <p>{{ product.description }}</p>
+                            <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'" class="mx-auto mb-4" width="150" height="150">
+                            <h3>{{ product.nombre }}</h3>
+                            <p>{{ truncateText(product.descripcion, 120) }}</p>
+                            <a href="#" class="btn btn-success">Comprar</a>
+                        </div>
+                    </div>
+                </swiper-slide>
+            </swiper>
+        </div>
+
+        <div class="container">
+            <h2 class="my-4 text-center"><b>Productos Recientes</b></h2>
+            <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
+                :pagination="{ clickable: true, }" :modules="modules" class="mySwiper py-5">
+                <swiper-slide  v-for="(product, index) in productsRecientes" :key="index">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'" class="mx-auto mb-4" width="150" height="150">
+                            <h3>{{ product.nombre }}</h3>
+                            <p>{{ truncateText(product.descripcion, 120) }}</p>
                             <a href="#" class="btn btn-success">Comprar</a>
                         </div>
                     </div>
@@ -58,6 +76,7 @@ import 'swiper/css/navigation';
 
 import navBar from './subcomponents/navBar.vue'
 import Footer from './subcomponents/footer.vue'
+import Swal from 'sweetalert2';
 export default {
     name: 'inicioVUe',
     components: {
@@ -69,12 +88,8 @@ export default {
     data() {
         return {
             isMenuOpen: false,
-            products: [
-                { name: 'Producto 1', description: 'Lorem ipsum dolor sit amet.', img: 'https://via.placeholder.com/150' },
-                { name: 'Producto 2', description: 'Lorem ipsum dolor sit amet.', img: 'https://via.placeholder.com/150' },
-                { name: 'Producto 3', description: 'Lorem ipsum dolor sit amet.', img: 'https://via.placeholder.com/150' },
-                { name: 'Producto 4', description: 'Lorem ipsum dolor sit amet.', img: 'https://via.placeholder.com/150' },
-            ],
+            products: [],
+            productsRecientes: [],
             services: [
                 { title: 'Entrega a domicilio', description: 'Recibe tus productos en la comodidad de tu hogar' },
                 { title: 'Consultas Médicas', description: 'Consulta a nuestros especialistas en salud.' },
@@ -85,8 +100,48 @@ export default {
         }
     },
     methods: {
+        productosDestacados(){
+            axios.get("/productosDestacadas").then(res => {
+                this.products = res.data
+            }).catch((err) => {
+                this.overlay = false;
+                Swal.fire({
+                    title: '¡Hubo un error al obtener datos!',
+                    icon: 'error',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#00A38C',
+                    customClass: {
+                        confirmButton: 'custom-confirm-button',  // Clase personalizada
+                    }
+                });
+            });
+        },
+        productosRecientes(){
+            axios.get("/productosRecientes").then(res => {
+                this.productsRecientes = res.data
+            }).catch((err) => {
+                this.overlay = false;
+                Swal.fire({
+                    title: '¡Hubo un error al obtener datos!',
+                    icon: 'error',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#00A38C',
+                    customClass: {
+                        confirmButton: 'custom-confirm-button',  // Clase personalizada
+                    }
+                });
+            });
+        },
+        truncateText(text, maxLength) {
+            if (text.length > maxLength) {
+                return text.substring(0, maxLength) + '...';
+            }
+            return text;
+        }
     },
     mounted() {
+        this.productosDestacados();
+        this.productosRecientes();
     }
 }
 </script>
