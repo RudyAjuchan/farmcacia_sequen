@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\Lote_producto;
 use App\Models\Producto;
 use App\Models\Subcategoria;
 use Illuminate\Http\Request;
@@ -40,5 +41,27 @@ class ecommerceController extends Controller
 
     public function subCategoriasEcommerce(){
         return Subcategoria::where('estado', 1)->get();
+    }
+
+    public function productosEcommerce(Request $request){
+        $query = Lote_producto::with(['productos', 'productos.subcategoria', 'productos.subcategoria.categoria'])
+        ->where('estado', 1);
+
+        // Filtro por categoría
+        if ($request->filled('categoria')) {
+            $query->whereHas('productos.subcategoria.categoria', function ($query) use ($request) {
+                $query->where('id', $request->categoria);
+            });
+        }
+
+        // Filtro por subcategoría
+        if ($request->filled('subcategoria')) {
+            $query->whereHas('productos.subcategoria', function ($subquery) use ($request) {
+                $subquery->where('id', $request->subcategoria);
+            });
+        }
+        // Paginación
+        $productos = $query->paginate(6);
+        return response()->json($productos);
     }
 }

@@ -72,6 +72,7 @@ Route::get('/productosDestacadas', [ecommerceController::class, 'productosDestac
 Route::get('/productosRecientes', [ecommerceController::class, 'productosRecientes'])->name('productos.recientes');
 Route::get('/categoriasEcomemrce', [ecommerceController::class, 'categoriasEcomemrce'])->name('categorias.ecommerce');
 Route::get('/subCategoriasEcommerce', [ecommerceController::class, 'subCategoriasEcommerce'])->name('subcategorias.ecommerce');
+Route::get('/productosEcommerce', [ecommerceController::class, 'productosEcommerce'])->name('productos.ecommerce');
 
 
 require __DIR__.'/auth.php';

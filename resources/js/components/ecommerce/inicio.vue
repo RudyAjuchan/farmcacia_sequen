@@ -63,6 +63,20 @@
         <!-- PIE -->
         <Footer></Footer>
     </div>
+
+    <v-overlay :model-value="overlay" persistent style="background-color: black; opacity: 0.8;"
+        class="align-center justify-center">
+        <v-card style="background-color: transparent; border: none;" flat>
+            <v-card-text>
+
+                <h3 class="text-center text-white"> Cargando datos </h3>
+            </v-card-text>
+            <v-card-actions class="justify-center aling-center">
+
+                <v-progress-circular color="success" indeterminate size="64"></v-progress-circular>
+            </v-card-actions>
+        </v-card>
+    </v-overlay>
 </template>
 <script>
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -97,12 +111,15 @@ export default {
             ],
             imgLogo: "/images/image.png",
             modules: [FreeMode, Pagination, Navigation],
+            overlay: false,
         }
     },
     methods: {
         productosDestacados(){
+            this.overlay = true;
             axios.get("/productosDestacadas").then(res => {
                 this.products = res.data
+                this.productosRecientes();
             }).catch((err) => {
                 this.overlay = false;
                 Swal.fire({
@@ -119,6 +136,7 @@ export default {
         productosRecientes(){
             axios.get("/productosRecientes").then(res => {
                 this.productsRecientes = res.data
+                this.overlay = false;
             }).catch((err) => {
                 this.overlay = false;
                 Swal.fire({
@@ -141,7 +159,6 @@ export default {
     },
     mounted() {
         this.productosDestacados();
-        this.productosRecientes();
     }
 }
 </script>
