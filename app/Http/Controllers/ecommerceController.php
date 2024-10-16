@@ -43,25 +43,35 @@ class ecommerceController extends Controller
         return Subcategoria::where('estado', 1)->get();
     }
 
-    public function productosEcommerce(Request $request){
+    public function productosEcommerce(Request $request) {
         $query = Lote_producto::with(['productos', 'productos.subcategoria', 'productos.subcategoria.categoria'])
-        ->where('estado', 1);
-
+            ->where('estado', 1);
+    
+        // Filtro por búsqueda de nombre de producto
+        if ($request->filled('buscar')) {
+            $query->whereHas('productos', function ($query) use ($request) {
+                $query->where('nombre', 'like', '%' . $request->buscar . '%');
+            });
+        }
+    
         // Filtro por categoría
         if ($request->filled('categoria')) {
             $query->whereHas('productos.subcategoria.categoria', function ($query) use ($request) {
                 $query->where('id', $request->categoria);
             });
         }
-
+    
         // Filtro por subcategoría
         if ($request->filled('subcategoria')) {
             $query->whereHas('productos.subcategoria', function ($subquery) use ($request) {
                 $subquery->where('id', $request->subcategoria);
             });
         }
+    
         // Paginación
         $productos = $query->paginate(6);
+    
         return response()->json($productos);
     }
+    
 }

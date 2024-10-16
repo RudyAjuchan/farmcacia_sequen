@@ -31,10 +31,20 @@
                     <!-- Grid de productos -->
                     <div class="col-md-9">
                         <h1 class="text-center mb-4"><b>Nuestros Productos</b></h1>
-                        <v-text-field variant="outlined" label="Buscar"></v-text-field>
+                        <!-- Campo de búsqueda y botón -->
+                        <div class="row align-items-center">
+                            <div class="col-md-11">
+                                <v-text-field v-model="searchQuery" variant="outlined" label="Buscar"
+                                    @input="buscarProductosLocal"></v-text-field>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-primary mb-3" @click="realizarBusqueda">Buscar</button>
+                            </div>
+                        </div>
+
                         <div class="row g-4">
                             <!-- Productos -->
-                            <div class="col-sm-6 col-md-4" v-for="producto in itemsProductos" :key="producto.id">
+                            <div class="col-sm-6 col-md-4" v-for="producto in productosFiltrados" :key="producto.id">
                                 <div class="product-card p-3 text-center">
                                     <img :src="producto.productos.imagen ? `/storage/${producto.productos.imagen}` : '/storage/no-disponible.png'"
                                         width="150" height="150" :alt="producto.productos.nombre" />
@@ -107,12 +117,14 @@ export default {
             itemsCategorias: [],
             itemsSubcategorias: [],
             itemsProductos: [],
+            productosFiltrados: [], // Productos filtrados localmente
             paginaActual: 1,
             totalPaginas: 0,
             perPage: 6,
             overlay: false,
             filtroCategoria: null, // Filtro de categoría
-            filtroSubcategoria: null // Filtro de subcategoría
+            filtroSubcategoria: null, // Filtro de subcategoría
+            searchQuery: '' // Para el campo de búsqueda
         }
     },
     methods: {
@@ -156,7 +168,8 @@ export default {
                     subcategoria: this.filtroSubcategoria,
                 }
             }).then(res => {
-                this.itemsProductos = res.data.data
+                this.itemsProductos = res.data.data;
+                this.productosFiltrados = this.itemsProductos; // Llenar productos iniciales
                 this.paginaActual = res.data.current_page;
                 this.totalPaginas = res.data.last_page;
                 this.overlay = false;
@@ -195,6 +208,41 @@ export default {
         filtrarPorSubcategoria(subcategoriaId) {
             this.filtroSubcategoria = subcategoriaId;
             this.obtenerProductos(1);
+        },
+        buscarProductosLocal() {
+            const query = this.searchQuery.toLowerCase();
+            this.productosFiltrados = this.itemsProductos.filter(producto => 
+                producto.productos.nombre.toLowerCase().includes(query)
+            );
+        },
+        realizarBusqueda() {
+            this.overlay = true;
+            axios.get('/productosEcommerce', {
+                params: {
+                    buscar: this.searchQuery,  // Enviar la búsqueda al servidor
+                    categoria: this.filtroCategoria,
+                    subcategoria: this.filtroSubcategoria,
+                    page: 1
+                }
+            }).then(res => {
+                this.itemsProductos = res.data.data;
+                this.productosFiltrados = this.itemsProductos;
+                this.paginaActual = res.data.current_page;
+                this.totalPaginas = res.data.last_page;
+                this.overlay = false;
+            }).catch((err) => {
+                this.overlay = false;
+                Swal.fire({
+                    title: '¡Hubo un error en la búsqueda!',
+                    text: err,
+                    icon: 'error',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#00A38C',
+                    customClass: {
+                        confirmButton: 'custom-confirm-button',  // Clase personalizada
+                    }
+                });
+            });
         },
     },
     mounted() {
