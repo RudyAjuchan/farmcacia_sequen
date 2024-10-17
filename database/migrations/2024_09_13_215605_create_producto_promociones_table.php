@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('producto_promociones', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('productos_id')->constrained('productos');
+            $table->foreignId('lote_productos_id')->constrained('lote_productos');
             $table->foreignId('promociones_id')->constrained('promociones');
+            $table->integer('estado')->default(1);
             $table->timestamps();
         });
     }

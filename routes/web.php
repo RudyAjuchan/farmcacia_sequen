@@ -8,6 +8,7 @@ use App\Http\Controllers\ecommerceController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\loteProductoController;
 use App\Http\Controllers\ProductosController;
+use App\Http\Controllers\promocionesController;
 use App\Http\Controllers\proveedoresController;
 use App\Http\Controllers\subCategoriaController;
 use App\Http\Controllers\ventasController;
@@ -62,6 +63,9 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::apiResource('clientes', clientesController::class);
     /* RUTAS PARA LOTE PRODUCTO */
     Route::apiResource('loteProductos', loteProductoController::class);
+    Route::get('/loteProductosPromociones', [loteProductoController::class, 'loteProductosPromociones'])->name('productos.destacados');
+    /* RUTAS PARA LOTE PRODUCTO */
+    Route::apiResource('promociones', promocionesController::class);
     //RUTAS PARA SUBIR IMÀGENES
     Route::post('/upload', [FileUploadController::class, 'store']);
     Route::post('/uploadDelete', [FileUploadController::class, 'eliminarImagen']);

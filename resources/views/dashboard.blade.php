@@ -61,7 +61,13 @@
                 <li>
                     <a href="/dashboard#/ventas">
                         <span class="icon"><ion-icon name="cart-outline"></ion-icon></span>
-                        <span class="title">ventas</span>
+                        <span class="title">Ventas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/dashboard#/promociones">
+                        <span class="icon"><ion-icon name="trending-down-outline"></ion-icon></span>
+                        <span class="title">Promociones</span>
                     </a>
                 </li>
                 <li>

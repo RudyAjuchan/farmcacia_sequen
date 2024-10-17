@@ -9,13 +9,13 @@ class producto_promociones extends Model
 {
     use HasFactory;
 
-    public function producto()
+    public function loteProductos()
     {
-        return $this->belongsTo(Producto::class);
+        return $this->belongsTo(Lote_producto::class, 'lote_productos_id');
     }
 
     public function promocion()
     {
-        return $this->belongsTo(Promociones::class);
+        return $this->belongsTo(Promociones::class, 'promociones_id');
     }
 }
