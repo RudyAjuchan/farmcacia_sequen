@@ -16,9 +16,17 @@ FOR EACH ROW
 CREATE TRIGGER actualizar_lote_tras_venta
 AFTER INSERT ON detalle_ventas
 FOR EACH ROW
-   UPDATE lote_productos
-   SET cantidad_restante = cantidad_restante - NEW.cantidad
-   WHERE id = NEW.lote_productos_id;
+BEGIN
+    -- Actualizar la cantidad restante en lote
+    UPDATE lote_productos
+    SET cantidad_restante = cantidad_restante - NEW.cantidad
+    WHERE id = NEW.lote_productos_id;
+
+    -- Cambiar el estado a 0 si la cantidad restante se convierte en cero
+    UPDATE lote_productos
+    SET estado = 0
+    WHERE id = NEW.lote_productos_id AND cantidad_restante <= 0;
+END$$
 
 CREATE TRIGGER validar_stock_antes_venta
 BEFORE INSERT ON detalle_ventas

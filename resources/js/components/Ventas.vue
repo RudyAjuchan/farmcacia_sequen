@@ -379,6 +379,7 @@ export default {
                 this.limpiar2();
                 this.card = false;
                 this.getData();
+                this.getProductos();
             }).catch((error) => {
                 this.overlay = false;
                 toast.error("¡Hubo un error al guardar los datos!", {

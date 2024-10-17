@@ -45,7 +45,14 @@ class ecommerceController extends Controller
 
     public function productosEcommerce(Request $request) {
         $query = Lote_producto::with(['productos', 'productos.subcategoria', 'productos.subcategoria.categoria'])
-            ->where('estado', 1);
+        ->where('estado', 1)
+        ->whereIn('id', function ($subquery) {
+            $subquery->selectRaw('MIN(id)')
+            ->from('lote_productos')
+            ->where('cantidad_restante', '>', 0)
+                ->where('estado', 1)
+                ->groupBy('productos_id');
+        });
     
         // Filtro por búsqueda de nombre de producto
         if ($request->filled('buscar')) {
