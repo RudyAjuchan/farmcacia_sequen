@@ -212,6 +212,7 @@ export default {
         },
         guardarCambios(){
             this.overlay = true;
+            console.log(this.dataSave.id);
             axios.put(`/promociones/${this.dataSave.id}`,{
                 descuento: this.dataSave.descuento,
                 descripcion: this.dataSave.descripcion,
@@ -242,7 +243,7 @@ export default {
         },
         eliminar() {
             this.overlay = true;
-            axios.delete(`/categorias/${this.dataSave.id}`).then(res=>{
+            axios.delete(`/promociones/${this.dataSave.id}`).then(res=>{
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
                     autoClose: 3000,

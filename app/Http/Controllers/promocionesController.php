@@ -46,7 +46,39 @@ class promocionesController extends Controller
         }
     }
 
-    public function update(Request $request, producto_promociones $promocion_producto){
-        return $promocion_producto;
+    public function update(Request $request, producto_promociones $promocione){
+        //buscamos la promoción
+        try{
+            $promocion = Promociones::where('id', $promocione->promociones_id)->first();
+            $promocion->descripcion = $request->descripcion;
+            $promocion->descuento = $request->descuento;
+            $promocion->fecha_inicio = $request->fecha_inicio;
+            $promocion->fecha_fin = $request->fecha_fin;
+            $promocion->updated_at = now();
+            $promocion->save();
+    
+            //actualizamos el lote
+            $promocione->lote_productos_id = $request->lote;
+            $promocione->save();
+            return response()->json(['message' => 'Promoción actualizada con éxito'], 201);
+        }catch(\Exception $e){
+            return response()->json(['error' => 'Error al actualizar la promoción', 'details' => $e->getMessage()], 500);
+        }
+    }
+
+    public function destroy(producto_promociones $promocione){
+        try{
+            $promocione->estado = 0;
+            $promocione->updated_at = now();
+            $promocione->save();
+    
+            $promocion = Promociones::where('id', $promocione->promociones_id)->first();
+            $promocion->estado = 0;
+            $promocion->updated_at = now();
+            $promocion->save();
+            return response()->json(['message' => 'Promoción eliminada con éxito'], 201);
+        }catch(\Exception $e){
+            return response()->json(['error' => 'Error al eliminar la promoción', 'details' => $e->getMessage()], 500);
+        }
     }
 }

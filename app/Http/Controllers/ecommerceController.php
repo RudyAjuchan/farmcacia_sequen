@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Categoria;
 use App\Models\Lote_producto;
 use App\Models\Producto;
+use App\Models\producto_promociones;
 use App\Models\Subcategoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -81,4 +82,48 @@ class ecommerceController extends Controller
         return response()->json($productos);
     }
     
+
+    public function productosPromocion(Request $request){
+        $query = producto_promociones::with(['loteProductos', 'promocion', 'loteProductos.productos'])
+        ->where('estado', 1)
+        ->whereHas('promocion', function ($query) {
+            $hoy = now()->toDateString(); // Obtener la fecha actual en formato 'YYYY-MM-DD'
+            $query->where('fecha_inicio', '<=', $hoy)
+            ->where('fecha_fin', '>=', $hoy);
+        });
+
+
+        // Filtro por categoría
+        if ($request->filled('categoria')) {
+            $query->whereHas('loteProductos.productos.subcategoria.categoria', function ($query) use ($request) {
+                $query->where('id', $request->categoria);
+            });
+        }
+    
+        // Filtro por subcategoría
+        if ($request->filled('subcategoria')) {
+            $query->whereHas('loteProductos.productos.subcategoria', function ($subquery) use ($request) {
+                $subquery->where('id', $request->subcategoria);
+            });
+        }
+
+        $precios = [
+            0 => 200,
+            1 => 400,
+            2 => 600,
+            3 => 800,
+            4 => 1000,
+        ];
+
+        //Filtro por precio
+        if ($request->filled('precio') && $request->precio!=5){
+            $query->whereHas('loteProductos', function ($query) use ($request, $precios) {
+                $query->where('precio', '<=', $precios[$request->precio]);
+            });
+        }
+
+        $productos = $query->paginate(6);
+
+        return response()->json($productos);
+    }
 }
