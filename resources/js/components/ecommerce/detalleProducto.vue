@@ -8,15 +8,16 @@
             <div class="col-md-6">
                 <h2>{{ producto.productos.nombre }}</h2>
                 <p class="text-muted">
-                    <del>{{ producto.precio }}</del>
-                    <span class="text-success"><b>{{ formato_numero(producto.precio - producto.producto_promocion[0]?.promocion.descuento) }}</b></span>
+                    <del v-if="producto.producto_promocion[0]?.promocion">{{ formato_numero(producto.precio) }}</del>
+                    <span class="text-success" v-if="!producto.producto_promocion[0]?.promocion"><b> {{ formato_numero(producto.precio) }}</b></span>
+                    <span class="text-success" v-if="producto.producto_promocion[0]?.promocion"><b>{{ formato_numero(producto.precio - producto.producto_promocion[0]?.promocion?.descuento) }}</b></span>
                 </p>
-                <span class="badge bg-danger">{{ 
-                    Math.round((producto.producto_promocion[0]?.promocion.descuento*100)/producto.precio ,0) }}% dedescuento</span>
+                <span class="badge bg-danger" v-if="producto.producto_promocion[0]?.promocion">{{ 
+                    Math.round((producto.producto_promocion[0]?.promocion?.descuento*100)/producto.precio ,0) }}% dedescuento</span>
                 <p class="mt-3">{{ producto.productos.descripcion }}</p>
 
 
-                <button class="btn btn-primary mt-3" @click="agregarAlCarrito">
+                <button class="btn btn-success mt-3" @click="agregarAlCarrito">
                     Añadir al carrito
                 </button>
             </div>

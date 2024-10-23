@@ -18,7 +18,7 @@
             <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
                 :pagination="{ clickable: true, }" :modules="modules" class="mySwiper py-5">
                 <swiper-slide v-for="(product, index) in products" :key="index">
-                    <a :href="`#/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset">
+                    <a :href="`#/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset" target="_blank">
                         <div class="card text-center">
                             <div class="card-body">
                                 <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'"
@@ -38,7 +38,7 @@
             <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
                 :pagination="{ clickable: true, }" :modules="modules" class="mySwiper py-5">
                 <swiper-slide v-for="(product, index) in productsRecientes" :key="index">
-                    <a :href="`#/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset">
+                    <a :href="`#/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset" target="_blank">
                         <div class="card text-center">
                             <div class="card-body">
                                 <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'"

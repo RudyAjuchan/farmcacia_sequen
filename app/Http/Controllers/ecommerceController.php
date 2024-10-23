@@ -127,15 +127,30 @@ class ecommerceController extends Controller
         return response()->json($productos);
     }
 
-    public function productoEcommerce(Request $request){
-        return Lote_producto::with('productos', 'producto_promocion', 'producto_promocion.promocion')
-        ->whereHas('producto_promocion.promocion', function ($query) {
-            $hoy = now()->toDateString(); // Obtener la fecha actual en formato 'YYYY-MM-DD'
-            $query->where('fecha_inicio', '<=', $hoy)
-            ->where('fecha_fin', '>=', $hoy);
-        })
-        ->where('id', $request->id)->first();
+    public function productoEcommerce(Request $request)
+    {
+        $hoy = now()->toDateString(); // Obtener la fecha actual en formato 'YYYY-MM-DD'
+
+        $producto =  Lote_producto::with(['productos', 'producto_promocion.promocion' => function ($query) use ($hoy) {
+            // Carga las promociones pero solo si el estado es 1
+            $query
+            ->where('fecha_inicio', '<=', $hoy)
+                ->where('fecha_fin', '>=', $hoy);
+        }])
+        ->where('id', $request->id)
+        ->first();
+        
+        $datosFiltrados = $producto->producto_promocion->filter(function ($p) {
+            return $p->estado !== 0; // Usar ->estado ya que es un objeto
+        })->values();;
+        unset($producto->producto_promocion);
+        $producto->producto_promocion = $datosFiltrados;
+        return $producto;
     }
+
+
+
+
 
     public function productosSimilaresEcommerce(Request $request){
         // Obtener la subcategoría del producto en el lote

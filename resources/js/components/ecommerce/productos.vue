@@ -38,22 +38,25 @@
                                     @input="buscarProductosLocal"></v-text-field>
                             </div>
                             <div class="col-md-1">
-                                <button class="btn btn-primary mb-3" @click="realizarBusqueda">Buscar</button>
+                                <button class="btn btn-success mb-3" @click="realizarBusqueda">Buscar</button>
                             </div>
                         </div>
 
                         <div class="row g-4">
                             <!-- Productos -->
                             <div class="col-sm-6 col-md-4" v-for="producto in productosFiltrados" :key="producto.id">
-                                <div class="product-card p-3 text-center">
-                                    <img :src="producto.productos.imagen ? `/storage/${producto.productos.imagen}` : '/storage/no-disponible.png'"
-                                        width="150" height="150" :alt="producto.productos.nombre" />
-                                    <h5>{{ producto.productos.nombre }}</h5>
-                                    <p class="text-success">{{ formato_numero(producto.precio) }}</p>
-                                    <button class="btn btn-success" @click="agregarAlCarrito(producto)">
-                                        Agregar al Carrito
-                                    </button>
-                                </div>
+                                <a :href="`#/detalle/${producto.id}`"
+                                    class="text-decoration-none text-reset" target="_blank">
+                                    <div class="product-card p-3 text-center">
+                                        <img :src="producto.productos.imagen ? `/storage/${producto.productos.imagen}` : '/storage/no-disponible.png'"
+                                            width="150" height="150" :alt="producto.productos.nombre" />
+                                        <h5>{{ producto.productos.nombre }}</h5>
+                                        <p class="text-success">{{ formato_numero(producto.precio) }}</p>
+                                        <button class="btn btn-success" @click="agregarAlCarrito(producto)">
+                                            Agregar al Carrito
+                                        </button>
+                                    </div>
+                                </a>
                             </div>
                         </div>
 

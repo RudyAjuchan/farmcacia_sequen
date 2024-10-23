@@ -10,15 +10,18 @@
             <v-row>
                 <v-col cols="4">
                     <v-autocomplete variant="outlined" label="Filtrar por categoría" :items="itemsCategorias"
-                        item-title="nombre" item-value="id" @update:modelValue="filtrarPorCategoria" v-model="modelCategoria"></v-autocomplete>
+                        item-title="nombre" item-value="id" @update:modelValue="filtrarPorCategoria"
+                        v-model="modelCategoria"></v-autocomplete>
                 </v-col>
                 <v-col cols="4">
                     <v-autocomplete variant="outlined" label="Filtrar por subcategoría" :items="itemsSubcategorias"
-                        item-title="nombre" item-value="id" @update:modelValue="filtrarPorSubcategoria" v-model="modelSubCategoria"></v-autocomplete>
+                        item-title="nombre" item-value="id" @update:modelValue="filtrarPorSubcategoria"
+                        v-model="modelSubCategoria"></v-autocomplete>
                 </v-col>
                 <v-col cols="4">
                     <v-autocomplete variant="outlined" label="Filtrar por rango de precio" :items="itemsRangos"
-                        item-title="nombre" item-value="id" v-model="modelRangos" @update:modelValue="filtrarPorPrecio"></v-autocomplete>
+                        item-title="nombre" item-value="id" v-model="modelRangos"
+                        @update:modelValue="filtrarPorPrecio"></v-autocomplete>
                 </v-col>
             </v-row>
 
@@ -27,25 +30,29 @@
             <div class="row g-4">
                 <div class="col-md-4" v-for="producto in productosFiltrados" :key="producto.id">
                     <div class="card h-100">
-                        <div class="card-body text-center">
-                            <img :src="producto.lote_productos.productos.imagen ? `/storage/${producto.lote_productos.productos.imagen}` : '/storage/no-disponible.png'"
-                                width="150" height="150" :alt="producto.lote_productos.productos.nombre" />
-                            <h5 class="card-title">{{ producto.lote_productos.productos.nombre }}</h5>
-                            <p class="text-muted">
-                                <del>{{ formato_numero(producto.lote_productos.precio) }}</del>&nbsp;
-                                <span class="text-success"><b>{{ formato_numero(producto.lote_productos.precio -
+                        <a :href="`#/detalle/${producto.lote_productos.id}`" class="text-decoration-none text-reset" target="_blank">
+                            <div class="card-body text-center">
+                                <img :src="producto.lote_productos.productos.imagen ? `/storage/${producto.lote_productos.productos.imagen}` : '/storage/no-disponible.png'"
+                                    width="150" height="150" :alt="producto.lote_productos.productos.nombre" />
+                                <h5 class="card-title">{{ producto.lote_productos.productos.nombre }}</h5>
+                                <p class="text-muted">
+                                    <del>{{ formato_numero(producto.lote_productos.precio) }}</del>&nbsp;
+                                    <span class="text-success"><b>{{ formato_numero(producto.lote_productos.precio -
                                         producto.promocion.descuento) }}</b></span>
-                            </p>
-                            <span class="badge bg-danger">{{
-                                Math.round((producto.promocion.descuento*100)/producto.lote_productos.precio ,0) }}% de
-                                descuento</span><br />
-                            <button class="btn btn-success mt-3" @click="agregarAlCarrito(producto)">
-                                Añadir al carrito
-                            </button>
-                            <p class="mt-2">
-                                <span>Oferta válida del {{ formato_fecha(producto.promocion.fecha_inicio) }} al {{ formato_fecha(producto.promocion.fecha_fin) }}</span>
-                            </p>
-                        </div>
+                                </p>
+                                <span class="badge bg-danger">{{
+                                    Math.round((producto.promocion.descuento * 100) / producto.lote_productos.precio, 0) }}%
+                                    de
+                                    descuento</span><br />
+                                <button class="btn btn-success mt-3" @click="agregarAlCarrito(producto)">
+                                    Añadir al carrito
+                                </button>
+                                <p class="mt-2">
+                                    <span>Oferta válida del {{ formato_fecha(producto.promocion.fecha_inicio) }} al {{
+                                        formato_fecha(producto.promocion.fecha_fin) }}</span>
+                                </p>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>
