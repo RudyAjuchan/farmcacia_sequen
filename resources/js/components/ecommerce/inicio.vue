@@ -25,7 +25,7 @@
                                     class="mx-auto mb-4" width="150" height="150">
                                 <h3>{{ product.nombre }}</h3>
                                 <p>{{ truncateText(product.descripcion, 120) }}</p>
-                                <a href="#" class="btn btn-success">Comprar</a>
+                                <a href="#" class="btn btn-success" @click="agregarCarrito(product)">agregar al carrito</a>
                             </div>
                         </div>
                     </a>
@@ -45,7 +45,7 @@
                                     class="mx-auto mb-4" width="150" height="150">
                                 <h3>{{ product.nombre }}</h3>
                                 <p>{{ truncateText(product.descripcion, 120) }}</p>
-                                <a href="#" class="btn btn-success">Comprar</a>
+                                <a href="#" class="btn btn-success">agregar al carrito</a>
                             </div>
                         </div>
                     </a>

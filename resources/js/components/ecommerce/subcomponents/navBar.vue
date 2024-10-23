@@ -38,6 +38,15 @@
                         <template v-else>
                             <a href="/log_in" class="btn btn-light">Iniciar Sesión</a>
                         </template>
+                        <!-- Carrito con indicador de productos -->
+                        <a href="#" class="text-decoration-none text-reset ms-4 position-relative">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <!-- Mostrar el indicador solo si hay productos en el carrito -->
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ carrito.length>0 ? carrito.length: 0 }}
+                            </span>
+                        </a>
                     </div>
                 </div>
             </nav>
@@ -57,6 +66,7 @@ export default {
         return {
             isMenuOpen: false,
             user: null,
+            carrito: [],
         }
     },
     methods: {

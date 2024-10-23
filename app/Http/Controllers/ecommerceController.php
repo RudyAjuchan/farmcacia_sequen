@@ -13,12 +13,40 @@ use Illuminate\Support\Facades\DB;
 class ecommerceController extends Controller
 {
     public function productosDestacados(){
-        $productosMasVendidos = Producto::with(['loteProductos'])->withCount(['detalleVentas as total_vendido' => function ($query) {
+        $hoy = now()->toDateString();
+        $productosMasVendidos = Producto::with(['loteProductos','loteProductos.productos', 'loteProductos.producto_promocion.promocion'=> function ($query) use ($hoy) {
+            // Carga las promociones pero solo si el estado es 1
+            $query
+            ->where('fecha_inicio', '<=', $hoy)
+                ->where('fecha_fin', '>=', $hoy);
+        }])->withCount(['detalleVentas as total_vendido' => function ($query) {
             $query->select(DB::raw('SUM(cantidad)'));
         }])->where('stock', '>', 0)->orderByDesc('total_vendido')->take(10)->get();
 
+        foreach($productosMasVendidos as &$PMV){
+            $datosFiltrados = $PMV->lote_productos[0]->producto_promocion->filter(function ($p) {
+                return $p->estado !== 0; // Usar ->estado ya que es un objeto
+            })->values();
+            unset($PMV->lote_productos[0]->producto_promocion);
+            $PMV->lote_productos[0]->producto_promocion = $datosFiltrados;
+        }
+
         if ($productosMasVendidos->count() < 4) {
-            $productosAjuste = Producto::with(['loteProductos'])->where('stock', '>', 0)->limit(4)->get();
+            $productosAjuste = Producto::with(['loteProductos','loteProductos.productos', 'loteProductos.producto_promocion.promocion'=> function ($query) use ($hoy) {
+                // Carga las promociones pero solo si el estado es 1
+                $query
+                ->where('fecha_inicio', '<=', $hoy)
+                    ->where('fecha_fin', '>=', $hoy);
+            }])->where('stock', '>', 0)->limit(4)->get();
+
+            foreach($productosAjuste as &$PA){
+                $datosFiltrados2 = $PA->producto_promocion->filter(function ($p) {
+                    return $p->estado !== 0; // Usar ->estado ya que es un objeto
+                })->values();
+                unset($PA->producto_promocion);
+                $PA->producto_promocion = $datosFiltrados2;
+            }
+
 
             $productosMasVendidos = $productosMasVendidos->merge($productosAjuste);
         }
@@ -142,7 +170,7 @@ class ecommerceController extends Controller
         
         $datosFiltrados = $producto->producto_promocion->filter(function ($p) {
             return $p->estado !== 0; // Usar ->estado ya que es un objeto
-        })->values();;
+        })->values();
         unset($producto->producto_promocion);
         $producto->producto_promocion = $datosFiltrados;
         return $producto;
