@@ -3,21 +3,18 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-6">
-                <img :src="producto.imagen" class="img-fluid" :alt="producto.nombre" />
+                <img :src="producto.productos.imagen ? `/storage/${producto.productos.imagen}` : '/storage/no-disponible.png'" class="img-fluid" width="250" :alt="producto.productos.nombre" />
             </div>
             <div class="col-md-6">
-                <h2>{{ producto.nombre }}</h2>
+                <h2>{{ producto.productos.nombre }}</h2>
                 <p class="text-muted">
-                    <del>{{ producto.precioOriginal }}</del>
-                    <span class="text-success">{{ producto.precioConDescuento }}</span>
+                    <del>{{ producto.precio }}</del>
+                    <span class="text-success"><b>{{ formato_numero(producto.precio - producto.producto_promocion[0]?.promocion.descuento) }}</b></span>
                 </p>
-                <span class="badge bg-danger">{{ producto.descuento }}% OFF</span>
-                <p class="mt-3">{{ producto.descripcion }}</p>
+                <span class="badge bg-danger">{{ 
+                    Math.round((producto.producto_promocion[0]?.promocion.descuento*100)/producto.precio ,0) }}% dedescuento</span>
+                <p class="mt-3">{{ producto.productos.descripcion }}</p>
 
-                <div class="d-flex align-items-center">
-                    <label class="me-2">Cantidad:</label>
-                    <input type="number" v-model="cantidad" min="1" class="form-control w-25" />
-                </div>
 
                 <button class="btn btn-primary mt-3" @click="agregarAlCarrito">
                     Añadir al carrito
@@ -27,23 +24,23 @@
 
         <!-- Sección de Productos Similares -->
         <h3 class="mt-5">Productos Similares</h3>
-        <div class="row g-4">
-            <div class="col-md-4" v-for="productoSimilares in productosSimilares" :key="productoSimilares.id">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <img :src="productoSimilares.imagen" class="img-fluid mb-3" :alt="productoSimilares.nombre" />
-                        <h5 class="card-title">{{ productoSimilares.nombre }}</h5>
-                        <p class="text-muted">
-                            <del>{{ productoSimilares.precioOriginal }}</del>
-                            <span class="text-success">{{ productoSimilares.precioConDescuento }}</span>
-                        </p>
-                        <span class="badge bg-danger">{{ productoSimilares.descuento }}% OFF</span>
-                        <button class="btn btn-primary mt-3" @click="agregarAlCarrito(productoSimilares)">
-                            Añadir al carrito
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="container">
+            <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
+                :pagination="{ clickable: true, }" :modules="modules" class="mySwiper py-5">
+                <swiper-slide v-for="(product, index) in productosSimilares" :key="index">
+                    <a :href="`#/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'"
+                                    class="mx-auto mb-4" width="150" height="150">
+                                <h3>{{ product.nombre }}</h3>
+                                <p>{{ truncateText(product.descripcion, 120) }}</p>
+                                <a href="#" class="btn btn-success">Comprar</a>
+                            </div>
+                        </div>
+                    </a>
+                </swiper-slide>
+            </swiper>
         </div>
     </div>
 
@@ -51,6 +48,14 @@
     <Footer></Footer>
 </template>
 <script>
+import { Swiper, SwiperSlide } from 'swiper/vue';
+// import required modules
+import { Navigation, FreeMode, Pagination } from 'swiper/modules';
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 import navBar from './subcomponents/navBar.vue'
 import Footer from './subcomponents/footer.vue'
 export default {
@@ -58,6 +63,14 @@ export default {
     components:{
         navBar,
         Footer,
+        Swiper,
+        SwiperSlide,
+    },
+    props: {
+        id: {
+            type: String,
+            default: 0,
+        }
     },
     data() {
         return {
@@ -65,37 +78,12 @@ export default {
             cantidad: 1,
             nuevoComentario: '',
             producto: {
-                id: 1,
-                nombre: 'Producto Ejemplo',
-                precioOriginal: '$100',
-                precioConDescuento: '$75',
-                descuento: 25,
-                imagen: 'https://via.placeholder.com/150',
-                descripcion: 'Descripción detallada del producto aquí.',
+                productos: {},
+                producto_promocion: [],
             },
-            productosSimilares: [
-                {
-                    id: 2,
-                    nombre: 'Producto Similar 1',
-                    precioOriginal: '$50',
-                    precioConDescuento: '$40',
-                    descuento: 20,
-                    imagen: 'https://via.placeholder.com/150',
-                },
-                {
-                    id: 3,
-                    nombre: 'Producto Similar 2',
-                    precioOriginal: '$80',
-                    precioConDescuento: '$60',
-                    descuento: 25,
-                    imagen: 'https://via.placeholder.com/150',
-                },
-                // Agrega más productos similares aquí...
-            ],
-            comentarios: [
-                { id: 1, usuario: 'Usuario1', texto: 'Excelente producto!' },
-                { id: 2, usuario: 'Usuario2', texto: 'Muy útil y de buena calidad.' },
-            ],
+            productosSimilares: [],
+            productosSimilares: [],
+            modules: [FreeMode, Pagination, Navigation],
         }
     },
     methods: {
@@ -113,8 +101,56 @@ export default {
                 this.nuevoComentario = '';
             }
         },
+        getProducto() {
+            this.overlay = true;
+            axios.post("/productoEcommerce", { id: this.id}).then(res => {
+                this.overlay = false;
+                this.producto = res.data;
+                this.getProductosSimilares();
+            }).catch((err) => {
+                this.overlay = false;
+                Swal.fire({
+                    title: '¡Hubo un error al obtener datos!',
+                    icon: 'error',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#00A38C',
+                    customClass: {
+                        confirmButton: 'custom-confirm-button',  // Clase personalizada
+                    }
+                });
+            });
+        },
+        getProductosSimilares() {
+            this.overlay = true;
+            axios.post("/productosSimilaresEcommerce", { id: this.id}).then(res => {
+                this.overlay = false;
+                this.productosSimilares = res.data;
+            }).catch((err) => {
+                this.overlay = false;
+                Swal.fire({
+                    title: '¡Hubo un error al obtener datos!',
+                    icon: 'error',
+                    allowOutsideClick: false,
+                    confirmButtonColor: '#00A38C',
+                    customClass: {
+                        confirmButton: 'custom-confirm-button',  // Clase personalizada
+                    }
+                });
+            });
+        },
+        formato_numero(amount) {
+            var newAmount = new Intl.NumberFormat("es-GT", { style: "currency", currency: "GTQ", }).format(amount);
+            return newAmount;
+        },
+        truncateText(text, maxLength) {
+            if (text.length > maxLength) {
+                return text.substring(0, maxLength) + '...';
+            }
+            return text;
+        }
     },
     mounted() {
+        this.getProducto();
     }
 }
 </script>

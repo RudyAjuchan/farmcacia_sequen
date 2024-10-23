@@ -21,7 +21,7 @@ class Producto extends Model
 
     public function loteProductos()
     {
-        return $this->hasMany(Lote_producto::class);
+        return $this->hasMany(Lote_producto::class, 'productos_id')->where('estado', 1);
     }
 
     public function detalleVentas()

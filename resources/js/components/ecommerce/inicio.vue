@@ -17,15 +17,18 @@
             <h2 class="my-4 text-center"><b>Productos Destacados</b></h2>
             <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
                 :pagination="{ clickable: true, }" :modules="modules" class="mySwiper py-5">
-                <swiper-slide  v-for="(product, index) in products" :key="index">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'" class="mx-auto mb-4" width="150" height="150">
-                            <h3>{{ product.nombre }}</h3>
-                            <p>{{ truncateText(product.descripcion, 120) }}</p>
-                            <a href="#" class="btn btn-success">Comprar</a>
+                <swiper-slide v-for="(product, index) in products" :key="index">
+                    <a :href="`#/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'"
+                                    class="mx-auto mb-4" width="150" height="150">
+                                <h3>{{ product.nombre }}</h3>
+                                <p>{{ truncateText(product.descripcion, 120) }}</p>
+                                <a href="#" class="btn btn-success">Comprar</a>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </swiper-slide>
             </swiper>
         </div>
@@ -34,15 +37,18 @@
             <h2 class="my-4 text-center"><b>Productos Recientes</b></h2>
             <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
                 :pagination="{ clickable: true, }" :modules="modules" class="mySwiper py-5">
-                <swiper-slide  v-for="(product, index) in productsRecientes" :key="index">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'" class="mx-auto mb-4" width="150" height="150">
-                            <h3>{{ product.nombre }}</h3>
-                            <p>{{ truncateText(product.descripcion, 120) }}</p>
-                            <a href="#" class="btn btn-success">Comprar</a>
+                <swiper-slide v-for="(product, index) in productsRecientes" :key="index">
+                    <a :href="`#/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'"
+                                    class="mx-auto mb-4" width="150" height="150">
+                                <h3>{{ product.nombre }}</h3>
+                                <p>{{ truncateText(product.descripcion, 120) }}</p>
+                                <a href="#" class="btn btn-success">Comprar</a>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </swiper-slide>
             </swiper>
         </div>

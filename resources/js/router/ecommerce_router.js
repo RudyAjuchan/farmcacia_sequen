@@ -35,9 +35,10 @@ const routes = [
         component: promocionesComponent 
     },
     { 
-        path: '/detalle', 
+        path: '/detalle/:id', 
         name: 'detalleProductoVue', 
-        component: detalleProductoComponent 
+        component: detalleProductoComponent,
+        props: true,
     },
     { 
         path: '/carrito', 

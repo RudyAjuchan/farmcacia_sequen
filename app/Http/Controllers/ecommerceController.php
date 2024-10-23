@@ -13,12 +13,12 @@ use Illuminate\Support\Facades\DB;
 class ecommerceController extends Controller
 {
     public function productosDestacados(){
-        $productosMasVendidos = Producto::withCount(['detalleVentas as total_vendido' => function ($query) {
+        $productosMasVendidos = Producto::with(['loteProductos'])->withCount(['detalleVentas as total_vendido' => function ($query) {
             $query->select(DB::raw('SUM(cantidad)'));
         }])->where('stock', '>', 0)->orderByDesc('total_vendido')->take(10)->get();
 
         if ($productosMasVendidos->count() < 4) {
-            $productosAjuste = Producto::where('stock', '>', 0)->limit(4)->get();
+            $productosAjuste = Producto::with(['loteProductos'])->where('stock', '>', 0)->limit(4)->get();
 
             $productosMasVendidos = $productosMasVendidos->merge($productosAjuste);
         }
@@ -27,10 +27,10 @@ class ecommerceController extends Controller
     }
 
     public function productosRecientes(){
-        $productosRecientes = Producto::where('estado', 1)
+        $productosRecientes = Producto::with(['loteProductos'])->where('estado', 1)
         ->where('stock', '>', 0)
         ->orderBy('created_at', 'desc')
-        ->take(5)
+        ->take(6)
         ->get();
 
         return $productosRecientes;
@@ -125,5 +125,39 @@ class ecommerceController extends Controller
         $productos = $query->paginate(6);
 
         return response()->json($productos);
+    }
+
+    public function productoEcommerce(Request $request){
+        return Lote_producto::with('productos', 'producto_promocion', 'producto_promocion.promocion')
+        ->whereHas('producto_promocion.promocion', function ($query) {
+            $hoy = now()->toDateString(); // Obtener la fecha actual en formato 'YYYY-MM-DD'
+            $query->where('fecha_inicio', '<=', $hoy)
+            ->where('fecha_fin', '>=', $hoy);
+        })
+        ->where('id', $request->id)->first();
+    }
+
+    public function productosSimilaresEcommerce(Request $request){
+        // Obtener la subcategoría del producto en el lote
+        $loteProducto = Lote_producto::with(['productos', 'productos.subcategoria'])->where('id', $request->id)->first();
+
+        if (!$loteProducto || !$loteProducto->productos || !$loteProducto->productos->subcategoria) {
+            return response()->json(['error' => 'Producto o subcategoría no encontrados'], 404);
+        }
+
+        $subcategoriaId = $loteProducto->productos->subcategoria->id;
+
+        // Buscar productos similares en la misma subcategoría
+        $query = Producto::with(['loteProductos', 'subcategoria'])
+            ->where('estado', 1)
+            ->where('stock', '>', 0)
+            ->whereHas('subcategoria', function ($q) use ($subcategoriaId) {
+                $q->where('id', $subcategoriaId);
+            })
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get();
+
+        return $query;
     }
 }

@@ -78,6 +78,8 @@ Route::get('/categoriasEcomemrce', [ecommerceController::class, 'categoriasEcome
 Route::get('/subCategoriasEcommerce', [ecommerceController::class, 'subCategoriasEcommerce'])->name('subcategorias.ecommerce');
 Route::get('/productosEcommerce', [ecommerceController::class, 'productosEcommerce'])->name('productos.ecommerce');
 Route::get('/productosPromocion', [ecommerceController::class, 'productosPromocion'])->name('productos.promocion');
+Route::post('/productoEcommerce', [ecommerceController::class, 'productoEcommerce'])->name('producto.ecommerce');
+Route::post('/productosSimilaresEcommerce', [ecommerceController::class, 'productosSimilaresEcommerce'])->name('productosSimilares.ecommerce');
 
 
 require __DIR__.'/auth.php';
