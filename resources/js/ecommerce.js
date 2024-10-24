@@ -27,6 +27,11 @@ import * as directives from 'vuetify/directives'
 import VueHtmlToPaper from 'vue-html-to-paper';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
+/* PARA PINIA */
+import { createPinia } from "pinia";
+const pinia = createPinia();
+/* FIN PINIA */
 const options = {
     name: 'Imprimir',
     specs: [
@@ -53,4 +58,5 @@ const app = createApp({
 app.use(RouterWeb);
 app.use(vuetify);
 app.use(VueHtmlToPaper, options);
+app.use(pinia);
 app.mount('#app');

@@ -20,6 +20,7 @@
                                 <th>Producto</th>
                                 <th>Cantidad</th>
                                 <th>Precio Unitario</th>
+                                <th>Descuento</th>
                                 <th>Total</th>
                                 <th></th>
                             </tr>
@@ -28,15 +29,16 @@
                             <tr v-for="item in cartItems" :key="item.id">
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <img :src="item.image" alt="Producto" class="img-fluid me-3" style="width: 50px;">
-                                        <div>{{ item.name }}</div>
+                                        <!-- <img :src="item.image" alt="Producto" class="img-fluid me-3" style="width: 50px;"> -->
+                                        <div>{{ item.nombre }}</div>
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="number" v-model="item.quantity" class="form-control w-50" min="1">
+                                    <input type="number" v-model="item.cantidad" class="form-control w-50" min="1">
                                 </td>
-                                <td>{{ formatPrice(item.price) }}</td>
-                                <td>{{ formatPrice(item.quantity * item.price) }}</td>
+                                <td>{{ formato_numero(item.precio) }}</td>
+                                <td>{{ formato_numero(item.descuento) }}</td>
+                                <td>{{ formato_numero(item.subtotal) }}</td>
                                 <td>
                                     <button @click="removeFromCart(item.id)" class="btn btn-danger">Eliminar</button>
                                 </td>
@@ -47,7 +49,7 @@
 
                 <!-- Resumen del carrito -->
                 <div class="d-flex justify-content-between align-items-center mt-4">
-                    <h5>Total: <b>{{ formatPrice(cartTotal) }}</b></h5>
+                    <h5>Total: <b>{{ formato_numero(cartTotal) }}</b></h5>
                     <button class="btn btn-secondary">Proceder al Pago</button>
                 </div>
             </div>
@@ -60,6 +62,8 @@
 <script>
 import navBar from './subcomponents/navBar.vue'
 import Footer from './subcomponents/footer.vue'
+
+import { useCarritoStore } from '../../store/carrito';
 export default {
     name: 'carritoVue',
     components: {
@@ -69,28 +73,13 @@ export default {
     data() {
         return {
             imgLogo: "/images/image.png",
-            cartItems: [
-                // Ejemplo de productos en el carrito
-                {
-                    id: 1,
-                    name: 'Producto 1',
-                    price: 10.99,
-                    quantity: 2,
-                    image: '/images/product1.jpg', // Imagen de ejemplo
-                },
-                {
-                    id: 2,
-                    name: 'Producto 2',
-                    price: 20.00,
-                    quantity: 1,
-                    image: '/images/product2.jpg', // Imagen de ejemplo
-                },
-            ],
+            cartItems: [],
         }
     },
     methods: {
-        formatPrice(value) {
-            return `$${value.toFixed(2)}`;
+        formato_numero(amount) {
+            var newAmount = new Intl.NumberFormat("es-GT", { style: "currency", currency: "GTQ", }).format(amount);
+            return newAmount;
         },
         removeFromCart(itemId) {
             this.cartItems = this.cartItems.filter(item => item.id !== itemId);
@@ -101,10 +90,17 @@ export default {
     computed: {
         cartTotal() {
             return this.cartItems.reduce((total, item) => {
-                return total + item.price * item.quantity;
+                return total + item.precio * item.cantidad;
             }, 0);
         }
     },
+
+    created(){
+        this.store = useCarritoStore();
+        this.store.obtenerProductos();
+        this.cartItems = this.store.productos;
+
+    }
 }
 </script>
 

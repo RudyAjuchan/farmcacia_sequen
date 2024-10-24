@@ -1,6 +1,6 @@
 <template>
     <div>
-        <navBar :logo="imgLogo"></navBar>
+        <navBar :logo="imgLogo" :cantidad_producto="cant_producto" ref="compNavBar"></navBar>
 
         <!-- HERO -->
         <section class="hero">
@@ -18,12 +18,20 @@
             <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
                 :pagination="{ clickable: true, }" :modules="modules" class="mySwiper py-5">
                 <swiper-slide v-for="(product, index) in products" :key="index">
-                    <a :href="`#/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset" target="_blank">
+                    <a :href="`#/detalle/${product.lote_productos.id}`" class="text-decoration-none text-reset" target="_blank">
                         <div class="card text-center">
                             <div class="card-body">
                                 <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'"
                                     class="mx-auto mb-4" width="150" height="150">
                                 <h3>{{ product.nombre }}</h3>
+                                <p>
+                                    <del v-if="product.promociones[0].promocion">{{ formato_numero(product.lote_productos.precio) }}</del>
+                                    <span class="text-success" v-if="!product.promociones[0].promocion"><b> {{ formato_numero(product.lote_productos.precio) }}</b></span> &nbsp;
+                                    <span class="text-success" v-if="product.promociones[0].promocion"><b>{{ formato_numero(product.lote_productos.precio - product.promociones[0].promocion.descuento) }}</b></span>
+                                </p>
+                                <div v-if="!product.promociones[0].promocion" style="height: 40px;"></div>
+                                <span class="badge bg-danger mb-3" v-if="product.promociones[0].promocion">{{ 
+                                    Math.round((product.promociones[0].promocion.descuento*100)/product.lote_productos.precio ,0) }}% dedescuento</span>
                                 <p>{{ truncateText(product.descripcion, 120) }}</p>
                                 <a href="#" class="btn btn-success" @click="agregarCarrito(product)">agregar al carrito</a>
                             </div>
@@ -38,14 +46,14 @@
             <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
                 :pagination="{ clickable: true, }" :modules="modules" class="mySwiper py-5">
                 <swiper-slide v-for="(product, index) in productsRecientes" :key="index">
-                    <a :href="`#/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset" target="_blank">
+                    <a :href="`#/detalle/${product.lote_productos.id}`" class="text-decoration-none text-reset" target="_blank">
                         <div class="card text-center">
                             <div class="card-body">
                                 <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'"
                                     class="mx-auto mb-4" width="150" height="150">
                                 <h3>{{ product.nombre }}</h3>
                                 <p>{{ truncateText(product.descripcion, 120) }}</p>
-                                <a href="#" class="btn btn-success">agregar al carrito</a>
+                                <a href="#" class="btn btn-success" @click="agregarCarrito(product)">agregar al carrito</a>
                             </div>
                         </div>
                     </a>
@@ -69,6 +77,19 @@
         <!-- PIE -->
         <Footer></Footer>
     </div>
+
+    <v-dialog v-model="dialogCompra" persistent>
+        <v-card width="1000" class="mx-auto">
+            <v-card-title class="text-center">Información</v-card-title>
+            <v-card-text>
+                <p>El producto fue agregado con éxito</p>
+            </v-card-text>
+            <v-card-actions>
+                <router-link to="carrito"><v-btn color="secondary">Ir a carrito</v-btn></router-link>
+                <v-btn color="primary" variant="tonal" @click="dialogCompra = false, limpiar()">Seguir comprando</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 
     <v-overlay :model-value="overlay" persistent style="background-color: black; opacity: 0.8;"
         class="align-center justify-center">
@@ -97,6 +118,9 @@ import 'swiper/css/navigation';
 import navBar from './subcomponents/navBar.vue'
 import Footer from './subcomponents/footer.vue'
 import Swal from 'sweetalert2';
+
+/* PARA PINIA */
+import { useCarritoStore } from '../../store/carrito';
 export default {
     name: 'inicioVUe',
     components: {
@@ -118,6 +142,9 @@ export default {
             imgLogo: "/images/image.png",
             modules: [FreeMode, Pagination, Navigation],
             overlay: false,
+            store: null,
+            cant_producto: 0,
+            dialogCompra: false,
         }
     },
     methods: {
@@ -158,13 +185,35 @@ export default {
         },
         truncateText(text, maxLength) {
             if (text.length > maxLength) {
-                return text.substring(0, maxLength) + '...';
+                let truncated = text.substring(0, maxLength);
+                let lastSpace = truncated.lastIndexOf(' ');
+                if (lastSpace > 0) {
+                    truncated = truncated.substring(0, lastSpace);
+                }
+                return truncated + '...';
+            } else {
+                // Rellenamos con "&nbsp;" en lugar de espacios regulares
+                return text + '\n' + '\u00A0'.repeat((maxLength+50) - text.length);
             }
-            return text;
-        }
+        },
+        formato_numero(amount) {
+            var newAmount = new Intl.NumberFormat("es-GT", { style: "currency", currency: "GTQ", }).format(amount);
+            return newAmount;
+        },
+        agregarCarrito(producto){
+            this.store.agregarProductos(producto);
+            this.cant_producto = this.store.productos.length;
+            this.$refs.compNavBar.setCantidad(this.cant_producto);
+            this.dialogCompra = true;
+        },
     },
     mounted() {
         this.productosDestacados();
+    },
+    created(){
+        this.store = useCarritoStore();
+        this.store.obtenerProductos();
+        this.cant_producto = this.store.productos.length;
     }
 }
 </script>

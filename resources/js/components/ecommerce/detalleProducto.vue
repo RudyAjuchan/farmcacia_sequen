@@ -145,10 +145,17 @@ export default {
         },
         truncateText(text, maxLength) {
             if (text.length > maxLength) {
-                return text.substring(0, maxLength) + '...';
+                let truncated = text.substring(0, maxLength);
+                let lastSpace = truncated.lastIndexOf(' ');
+                if (lastSpace > 0) {
+                    truncated = truncated.substring(0, lastSpace);
+                }
+                return truncated + '...';
+            } else {
+                // Rellenamos con "&nbsp;" en lugar de espacios regulares
+                return text + '\n' + '\u00A0'.repeat((maxLength+50) - text.length);
             }
-            return text;
-        }
+        },
     },
     mounted() {
         this.getProducto();

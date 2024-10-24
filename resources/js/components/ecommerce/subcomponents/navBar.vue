@@ -44,7 +44,7 @@
                             <!-- Mostrar el indicador solo si hay productos en el carrito -->
                             <span
                                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ carrito.length>0 ? carrito.length: 0 }}
+                                {{ cantidadProducto }}
                             </span>
                         </a>
                     </div>
@@ -60,6 +60,10 @@ export default {
             type: String,
             require: true,
         },
+        cantidad_producto: {
+            type: Number,
+            require: true,
+        }
     },
     name: 'navBarVue',
     data() {
@@ -76,7 +80,6 @@ export default {
         getUser(){
             axios.get('/user').then(res => {
                 this.user = res.data.length>0 ? res.data : null ;
-                console.log(this.user)
             }).catch(error => {
                 console.error('Error fetching user:', error);
             });
@@ -90,10 +93,18 @@ export default {
                 .catch(error => {
                     console.error('Error logging out:', error);
                 });
+        },
+        setCantidad(cantidad){
+            this.cantidadProducto = cantidad;
         }
     },
     mounted() {
         this.getUser();
+    },
+    computed:{
+        cantidadProducto(){
+            return this.cantidad_producto;
+        }
     }
 }
 </script>

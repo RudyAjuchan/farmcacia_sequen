@@ -51,7 +51,16 @@
                                         <img :src="producto.productos.imagen ? `/storage/${producto.productos.imagen}` : '/storage/no-disponible.png'"
                                             width="150" height="150" :alt="producto.productos.nombre" />
                                         <h5>{{ producto.productos.nombre }}</h5>
-                                        <p class="text-success">{{ formato_numero(producto.precio) }}</p>
+                                        <p class="text-muted">
+                                            <del v-if="producto.producto_promocion[0]?.promocion">{{ formato_numero(producto.precio) }}</del>
+                                            <span class="text-success" v-if="!producto.producto_promocion[0]?.promocion"><b> {{ formato_numero(producto.precio) }}</b></span>
+                                            <span class="text-success" v-if="producto.producto_promocion[0]?.promocion"><b> &nbsp;{{ formato_numero(producto.precio - producto.producto_promocion[0]?.promocion?.descuento) }}</b></span>
+                                        </p>
+                                        <div v-if="!producto.producto_promocion[0]?.promocion" style="height: 25px"></div>
+                                        <p>
+                                            <span class="badge bg-danger" v-if="producto.producto_promocion[0]?.promocion">{{ 
+                                                Math.round((producto.producto_promocion[0]?.promocion?.descuento*100)/producto.precio ,0) }}% dedescuento</span>
+                                        </p>
                                         <button class="btn btn-success" @click="agregarAlCarrito(producto)">
                                             Agregar al Carrito
                                         </button>

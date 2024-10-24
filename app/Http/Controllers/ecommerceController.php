@@ -13,45 +13,42 @@ use Illuminate\Support\Facades\DB;
 class ecommerceController extends Controller
 {
     public function productosDestacados(){
-        $hoy = now()->toDateString();
-        $productosMasVendidos = Producto::with(['loteProductos','loteProductos.productos', 'loteProductos.producto_promocion.promocion'=> function ($query) use ($hoy) {
-            // Carga las promociones pero solo si el estado es 1
-            $query
-            ->where('fecha_inicio', '<=', $hoy)
-                ->where('fecha_fin', '>=', $hoy);
-        }])->withCount(['detalleVentas as total_vendido' => function ($query) {
-            $query->select(DB::raw('SUM(cantidad)'));
-        }])->where('stock', '>', 0)->orderByDesc('total_vendido')->take(10)->get();
+        //buscamos los productos más vendidos
+        $detalle_venta = DB::table('detalle_ventas')->select(DB::raw('SUM(cantidad) as cantidad_vendida'), 'productos_id')->groupBy('productos_id')->orderByDesc('cantidad_vendida')->take(10)->get()->toArray();
 
-        foreach($productosMasVendidos as &$PMV){
-            $datosFiltrados = $PMV->lote_productos[0]->producto_promocion->filter(function ($p) {
-                return $p->estado !== 0; // Usar ->estado ya que es un objeto
-            })->values();
-            unset($PMV->lote_productos[0]->producto_promocion);
-            $PMV->lote_productos[0]->producto_promocion = $datosFiltrados;
+        //obtenemos un array
+        $idsProductos = array_column($detalle_venta, 'productos_id');
+
+        //validamos si hay por lo menos 10 productos más vendidos, sino entonces rellenamos de productos normales
+        if(sizeof($idsProductos)<10){
+            $cantidad = 10 - sizeof($idsProductos);
+            $productosAjuste = DB::table('productos')->whereNotIn('id',$idsProductos)->where('estado', 1)->take($cantidad)->get()->toArray();
+            $idsProductosAjuste = array_column($productosAjuste, 'id');
+            $idsProductos = array_merge($idsProductos, $idsProductosAjuste);
         }
 
-        if ($productosMasVendidos->count() < 4) {
-            $productosAjuste = Producto::with(['loteProductos','loteProductos.productos', 'loteProductos.producto_promocion.promocion'=> function ($query) use ($hoy) {
-                // Carga las promociones pero solo si el estado es 1
-                $query
-                ->where('fecha_inicio', '<=', $hoy)
-                    ->where('fecha_fin', '>=', $hoy);
-            }])->where('stock', '>', 0)->limit(4)->get();
+        $productos = DB::table('productos')->whereIn('id',$idsProductos)->where('estado', 1)->take(10)->get();
 
-            foreach($productosAjuste as &$PA){
-                $datosFiltrados2 = $PA->producto_promocion->filter(function ($p) {
-                    return $p->estado !== 0; // Usar ->estado ya que es un objeto
-                })->values();
-                unset($PA->producto_promocion);
-                $PA->producto_promocion = $datosFiltrados2;
+        foreach($productos as &$PROD){
+            $lote = DB::table('lote_productos')->where('estado', 1)->where('cantidad_restante', '>', 0)->where('productos_id', $PROD->id)->first();
+            $PROD->lote_productos = $lote;
+
+            $producto_promocion = DB::table('producto_promociones')->where('lote_productos_id', $lote->id)->where('estado', 1)->get();
+
+            $hoy = now()->toDateString();
+            foreach($producto_promocion as &$PP){
+                $promocion = DB::table('promociones')
+                ->where('fecha_inicio', '<=', $hoy)
+                ->where('fecha_fin', '>=', $hoy)
+                ->where('estado', 1)
+                ->where('id', $PP->promociones_id)->first();
+                $PP->promocion = $promocion;
             }
 
-
-            $productosMasVendidos = $productosMasVendidos->merge($productosAjuste);
+            $PROD->promociones = $producto_promocion;
         }
 
-        return $productosMasVendidos;
+        return $productos;
     }
 
     public function productosRecientes(){
@@ -60,6 +57,25 @@ class ecommerceController extends Controller
         ->orderBy('created_at', 'desc')
         ->take(6)
         ->get();
+
+        foreach($productosRecientes as &$PROD){
+            $lote = DB::table('lote_productos')->where('estado', 1)->where('cantidad_restante', '>', 0)->where('productos_id', $PROD->id)->first();
+            $PROD->lote_productos = $lote;
+
+            $producto_promocion = DB::table('producto_promociones')->where('lote_productos_id', $lote->id)->where('estado', 1)->get();
+
+            $hoy = now()->toDateString();
+            foreach($producto_promocion as &$PP){
+                $promocion = DB::table('promociones')
+                ->where('fecha_inicio', '<=', $hoy)
+                ->where('fecha_fin', '>=', $hoy)
+                ->where('estado', 1)
+                ->where('id', $PP->promociones_id)->first();
+                $PP->promocion = $promocion;
+            }
+
+            $PROD->promociones = $producto_promocion;
+        }
 
         return $productosRecientes;
     }
@@ -73,7 +89,14 @@ class ecommerceController extends Controller
     }
 
     public function productosEcommerce(Request $request) {
-        $query = Lote_producto::with(['productos', 'productos.subcategoria', 'productos.subcategoria.categoria'])
+        $hoy = now()->toDateString(); // Obtener la fecha actual en formato 'YYYY-MM-DD'
+
+        $query = Lote_producto::with(['productos', 'productos.subcategoria', 'productos.subcategoria.categoria', 'producto_promocion' => function ($query) {
+            $query->where('estado', 1);
+        }, 'producto_promocion.promocion' => function ($query) use ($hoy) {
+            $query
+            ->where('fecha_inicio','<=',$hoy)->where('fecha_fin', '>=', $hoy);
+        }])
         ->where('estado', 1)
         ->whereIn('id', function ($subquery) {
             $subquery->selectRaw('MIN(id)')
@@ -160,7 +183,6 @@ class ecommerceController extends Controller
         $hoy = now()->toDateString(); // Obtener la fecha actual en formato 'YYYY-MM-DD'
 
         $producto =  Lote_producto::with(['productos', 'producto_promocion.promocion' => function ($query) use ($hoy) {
-            // Carga las promociones pero solo si el estado es 1
             $query
             ->where('fecha_inicio', '<=', $hoy)
                 ->where('fecha_fin', '>=', $hoy);
