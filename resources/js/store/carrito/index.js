@@ -22,6 +22,7 @@ export const useCarritoStore = defineStore('carrito', {
                     id: producto.id,
                     nombre: producto.nombre,
                     cantidad: 1,
+                    imagen: producto.imagen,
                     precio: producto.lote_productos.precio,
                     descuento: descuento,
                     subtotal: producto.lote_productos.precio - descuento,

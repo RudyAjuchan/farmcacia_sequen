@@ -29,7 +29,7 @@
                             <tr v-for="item in cartItems" :key="item.id">
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <!-- <img :src="item.image" alt="Producto" class="img-fluid me-3" style="width: 50px;"> -->
+                                        <img :src="item.imagen ? `/storage/${item.imagen}` : '/storage/no-disponible.png'" alt="Producto" class="img-fluid me-3" style="width: 50px;">
                                         <div>{{ item.nombre }}</div>
                                     </div>
                                 </td>
