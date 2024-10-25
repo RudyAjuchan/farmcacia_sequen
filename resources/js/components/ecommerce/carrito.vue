@@ -1,7 +1,7 @@
 <template>
     <div>
         <!-- Navbar -->
-        <navBar :logo="imgLogo"></navBar>
+        <navBar :logo="imgLogo" :cantidad_producto="cant_producto" ref="compNavBar"></navBar>
 
         <!-- Contenido del carrito -->
         <div class="container mt-5" id="carritoSection">
@@ -21,7 +21,7 @@
                                 <th>Cantidad</th>
                                 <th>Precio Unitario</th>
                                 <th>Descuento</th>
-                                <th>Total</th>
+                                <th>Sub total</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -34,7 +34,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="number" v-model="item.cantidad" class="form-control w-50" min="1">
+                                    <input type="number" v-model="item.cantidad" @change="updateItemQuantity(item)" class="form-control w-50" min="1">
                                 </td>
                                 <td>{{ formato_numero(item.precio) }}</td>
                                 <td>{{ formato_numero(item.descuento) }}</td>
@@ -74,6 +74,7 @@ export default {
         return {
             imgLogo: "/images/image.png",
             cartItems: [],
+            cant_producto: 0,
         }
     },
     methods: {
@@ -81,8 +82,19 @@ export default {
             var newAmount = new Intl.NumberFormat("es-GT", { style: "currency", currency: "GTQ", }).format(amount);
             return newAmount;
         },
+        updateItemQuantity(item) {
+            // Actualiza la cantidad en la store cada vez que cambia el input
+            this.store.actualizarCantidad(item.id, item.cantidad, item.precio);
+            this.store.obtenerProductos();
+            this.cartItems = this.store.productos;
+            this.cant_producto = this.store.productos.length;
+        },
         removeFromCart(itemId) {
-            this.cartItems = this.cartItems.filter(item => item.id !== itemId);
+            // Eliminar el producto usando la store
+            this.store.eliminarProducto(itemId);
+            this.store.obtenerProductos();
+            this.cartItems = this.store.productos;
+            this.cant_producto = this.store.productos.length;
         }
     },
     mounted() {
@@ -90,7 +102,7 @@ export default {
     computed: {
         cartTotal() {
             return this.cartItems.reduce((total, item) => {
-                return total + item.precio * item.cantidad;
+                return total + item.subtotal;
             }, 0);
         }
     },
@@ -99,7 +111,7 @@ export default {
         this.store = useCarritoStore();
         this.store.obtenerProductos();
         this.cartItems = this.store.productos;
-
+        this.cant_producto = this.store.productos.length;
     }
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-    <navBar :logo="imgLogo"></navBar>
+    <navBar :logo="imgLogo" :cantidad_producto="cant_producto" ref="compNavBar"></navBar>
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-6">
@@ -10,10 +10,13 @@
                 <p class="text-muted">
                     <del v-if="producto.producto_promocion[0]?.promocion">{{ formato_numero(producto.precio) }}</del>
                     <span class="text-success" v-if="!producto.producto_promocion[0]?.promocion"><b> {{ formato_numero(producto.precio) }}</b></span>
-                    <span class="text-success" v-if="producto.producto_promocion[0]?.promocion"><b>{{ formato_numero(producto.precio - producto.producto_promocion[0]?.promocion?.descuento) }}</b></span>
+                    <span class="text-success" v-if="producto.producto_promocion[0]?.promocion"><b>&nbsp;{{ formato_numero(producto.precio - producto.producto_promocion[0]?.promocion?.descuento) }}</b></span>
+                </p>
+                <p>
+                    <span class="badge bg-success">{{ producto.cantidad_restante }} en existencia</span>
                 </p>
                 <span class="badge bg-danger" v-if="producto.producto_promocion[0]?.promocion">{{ 
-                    Math.round((producto.producto_promocion[0]?.promocion?.descuento*100)/producto.precio ,0) }}% dedescuento</span>
+                    Math.round((producto.producto_promocion[0]?.promocion?.descuento*100)/producto.precio ,0) }}% de descuento</span>
                 <p class="mt-3">{{ producto.productos.descripcion }}</p>
 
 
@@ -29,21 +32,36 @@
             <swiper :slidesPerView="3" :navigation="true" :spaceBetween="30" :freeMode="true" :loop="true"
                 :pagination="{ clickable: true, }" :modules="modules" class="mySwiper py-5">
                 <swiper-slide v-for="(product, index) in productosSimilares" :key="index">
-                    <a :href="`#/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset">
+                    <router-link ></router-link>
+                    <router-link :to="`/detalle/${product.lote_productos[0].id}`" class="text-decoration-none text-reset">
                         <div class="card text-center">
                             <div class="card-body">
                                 <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'"
                                     class="mx-auto mb-4" width="150" height="150">
                                 <h3>{{ product.nombre }}</h3>
                                 <p>{{ truncateText(product.descripcion, 120) }}</p>
-                                <a href="#" class="btn btn-success">Comprar</a>
+                                <a href="#" class="btn btn-success">Añadir al carrito</a>
                             </div>
                         </div>
-                    </a>
+                    </router-link>
                 </swiper-slide>
             </swiper>
         </div>
     </div>
+
+    <v-dialog v-model="dialogCompra" persistent>
+        <v-card width="500" class="mx-auto">
+            <v-card-title class="text-center">Información</v-card-title>
+            <v-card-text class="text-center">
+                <p>El producto fue agregado con éxito</p>
+                <img :src="imgSuccess" alt="" width="150">
+            </v-card-text>
+            <v-card-actions>
+                <router-link to="/carrito"><v-btn color="secondary" variant="tonal">Ir a carrito</v-btn></router-link>
+                <v-btn color="primary" variant="tonal" @click="dialogCompra = false">Seguir comprando</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 
     <!-- PIE -->
     <Footer></Footer>
@@ -59,6 +77,9 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import navBar from './subcomponents/navBar.vue'
 import Footer from './subcomponents/footer.vue'
+
+/* PARA PINIA */
+import { useCarritoStore } from '../../store/carrito';
 export default {
     name: 'detalleProductoVue',
     components:{
@@ -85,12 +106,27 @@ export default {
             productosSimilares: [],
             productosSimilares: [],
             modules: [FreeMode, Pagination, Navigation],
+            imgSuccess: '/images/verificar.png',
+            store: null,
+            cant_producto: 0,
+            dialogCompra: false,
         }
     },
     methods: {
-        agregarAlCarrito(producto) {
-            // Lógica para agregar el producto al carrito
-            console.log('Agregando al carrito:', producto, 'Cantidad:', this.cantidad);
+        agregarAlCarrito() {
+            this.producto["promociones"] = [];
+            this.producto["promociones"][0] = [];
+            this.producto["promociones"][0]['promocion'] = this.producto["producto_promocion"][0]["promocion"];
+            this.producto["lote_productos"] = [];
+            this.producto["lote_productos"]["precio"] = this.producto["precio"];
+            this.producto["lote_productos"]["cantidad_restante"] = this.producto["cantidad_restante"];
+            this.producto["nombre"] = this.producto["productos"]["nombre"];
+            this.producto["imagen"] = this.producto["productos"]["imagen"];
+            this.producto["id"] = this.producto["productos"]["id"];
+            this.store.agregarProductos(this.producto);
+            this.cant_producto = this.store.productos.length;
+            this.$refs.compNavBar.setCantidad(this.cant_producto);
+            this.dialogCompra = true;
         },
         agregarComentario() {
             if (this.nuevoComentario.trim()) {
@@ -159,6 +195,16 @@ export default {
     },
     mounted() {
         this.getProducto();
-    }
+    },
+    created(){
+        this.store = useCarritoStore();
+        this.store.obtenerProductos();
+        this.cant_producto = this.store.productos.length;
+    },
+    watch: {
+        '$route'(to, from) {
+            window.location.reload();
+        }
+    },
 }
 </script>

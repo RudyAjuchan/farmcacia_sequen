@@ -52,10 +52,10 @@ class ecommerceController extends Controller
     }
 
     public function productosRecientes(){
-        $productosRecientes = Producto::with(['loteProductos'])->where('estado', 1)
+        $productosRecientes = Producto::where('estado', 1)
         ->where('stock', '>', 0)
         ->orderBy('created_at', 'desc')
-        ->take(6)
+        ->take(10)
         ->get();
 
         foreach($productosRecientes as &$PROD){

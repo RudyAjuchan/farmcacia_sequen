@@ -39,7 +39,7 @@
                             <a href="/log_in" class="btn btn-light">Iniciar Sesión</a>
                         </template>
                         <!-- Carrito con indicador de productos -->
-                        <a href="#" class="text-decoration-none text-reset ms-4 position-relative">
+                        <a href="#/carrito" target="_blank" class="text-decoration-none text-reset ms-4 position-relative">
                             <i class="fa-solid fa-cart-shopping"></i>
                             <!-- Mostrar el indicador solo si hay productos en el carrito -->
                             <span
@@ -54,6 +54,7 @@
     </div>
 </template>
 <script>
+import { useCarritoStore } from '../../../store/carrito';
 export default {
     props:{
         logo: {
@@ -71,6 +72,7 @@ export default {
             isMenuOpen: false,
             user: null,
             carrito: [],
+            store: null,
         }
     },
     methods: {
@@ -79,7 +81,9 @@ export default {
         },
         getUser(){
             axios.get('/user').then(res => {
-                this.user = res.data.length>0 ? res.data : null ;
+                this.user = res.data.name ? res.data : null ;
+                const estado = res.data.name ? true: false;
+                this.store.setAuth(estado);
             }).catch(error => {
                 console.error('Error fetching user:', error);
             });
@@ -88,6 +92,7 @@ export default {
             axios.post('/logout')
                 .then(() => {
                     this.user = null;  // Elimina los datos del usuario en el frontend
+                    this.store.logout();
                     window.location.href = '/';  // Redirige al usuario a la página principal
                 })
                 .catch(error => {
@@ -99,6 +104,7 @@ export default {
         }
     },
     mounted() {
+        this.store = useCarritoStore();
         this.getUser();
     },
     computed:{

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <navBar :logo="imgLogo"></navBar>
+        <navBar :logo="imgLogo" :cantidad_producto="cant_producto" ref="compNavBar"></navBar>
 
         <section class="py-5">
             <div class="container">
@@ -60,6 +60,7 @@
 <script>
 import navBar from './subcomponents/navBar.vue'
 import Footer from './subcomponents/footer.vue'
+import { useCarritoStore } from '../../store/carrito';
 export default {
     name: 'contactoVue',
     components: {
@@ -74,6 +75,9 @@ export default {
                 mensaje: '',
             },
             imgLogo: "/images/image.png",
+            store: null,
+            cant_producto: 0,
+            dialogCompra: false,
         }
     },
     methods: {
@@ -85,6 +89,11 @@ export default {
         },
     },
     mounted() {
+    },
+    created(){
+        this.store = useCarritoStore();
+        this.store.obtenerProductos();
+        this.cant_producto = this.store.productos.length;
     }
 }
 </script>

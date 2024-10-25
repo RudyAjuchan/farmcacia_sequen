@@ -1,6 +1,6 @@
 <template>
     <div>
-        <navBar :logo="imgLogo"></navBar>
+        <navBar :logo="imgLogo" :cantidad_producto="cant_producto" ref="compNavBar"></navBar>
         <!-- Banner de Promociones -->
         <div class="promo-banner mb-4">
 
@@ -44,15 +44,17 @@
                                     Math.round((producto.promocion.descuento * 100) / producto.lote_productos.precio, 0) }}%
                                     de
                                     descuento</span><br />
-                                <button class="btn btn-success mt-3" @click="agregarAlCarrito(producto)">
-                                    Añadir al carrito
-                                </button>
-                                <p class="mt-2">
-                                    <span>Oferta válida del {{ formato_fecha(producto.promocion.fecha_inicio) }} al {{
-                                        formato_fecha(producto.promocion.fecha_fin) }}</span>
-                                </p>
                             </div>
                         </a>
+                        <div class="text-center">
+                            <button class="btn btn-success mt-3" @click="agregarAlCarrito(producto)">
+                                Añadir al carrito
+                            </button>
+                            <p class="mt-2">
+                                <span>Oferta válida del {{ formato_fecha(producto.promocion.fecha_inicio) }} al {{
+                                    formato_fecha(producto.promocion.fecha_fin) }}</span>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -99,11 +101,27 @@
             </v-card>
         </v-overlay>
     </div>
+
+    <v-dialog v-model="dialogCompra" persistent>
+        <v-card width="500" class="mx-auto">
+            <v-card-title class="text-center">Información</v-card-title>
+            <v-card-text class="text-center">
+                <p>El producto fue agregado con éxito</p>
+                <img :src="imgSuccess" alt="" width="150">
+            </v-card-text>
+            <v-card-actions>
+                <router-link to="carrito"><v-btn color="secondary" variant="tonal">Ir a carrito</v-btn></router-link>
+                <v-btn color="primary" variant="tonal" @click="dialogCompra = false">Seguir comprando</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 <script>
 import navBar from './subcomponents/navBar.vue'
 import Footer from './subcomponents/footer.vue'
 import Swal from 'sweetalert2';
+/* PARA PINIA */
+import { useCarritoStore } from '../../store/carrito';
 export default {
     name: 'promocionesVue',
     components:{
@@ -143,6 +161,11 @@ export default {
             modelCategoria: null,
             modelSubCategoria: null,
             modelRangos: null,
+
+            imgSuccess: '/images/verificar.png',
+            store: null,
+            cant_producto: 0,
+            dialogCompra: false,
         }
     },
     methods: {
@@ -175,8 +198,16 @@ export default {
             });
         },
         agregarAlCarrito(producto) {
-            // Lógica para agregar producto al carrito
-            console.log('Agregando al carrito:', producto);
+            producto["promociones"] = [];
+            producto["promociones"][0] = [];
+            producto["promociones"][0]['promocion'] = producto["promocion"]
+            producto["nombre"] = producto["lote_productos"]["productos"]["nombre"];
+            producto["imagen"] = producto["lote_productos"]["productos"]["imagen"];
+            producto["id"] = producto["lote_productos"]["productos"]["id"];
+            this.store.agregarProductos(producto);
+            this.cant_producto = this.store.productos.length;
+            this.$refs.compNavBar.setCantidad(this.cant_producto);
+            this.dialogCompra = true;
         },
         cambiarPagina(pagina) {
             if (pagina >= 1 && pagina <= this.totalPaginas) {
@@ -264,6 +295,11 @@ export default {
     },
     computed: {        
     },
+    created(){
+        this.store = useCarritoStore();
+        this.store.obtenerProductos();
+        this.cant_producto = this.store.productos.length;
+    }
 }
 </script>
 

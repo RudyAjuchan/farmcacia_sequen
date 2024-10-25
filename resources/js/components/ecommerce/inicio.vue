@@ -31,7 +31,7 @@
                                 </p>
                                 <div v-if="!product.promociones[0].promocion" style="height: 40px;"></div>
                                 <span class="badge bg-danger mb-3" v-if="product.promociones[0].promocion">{{ 
-                                    Math.round((product.promociones[0].promocion.descuento*100)/product.lote_productos.precio ,0) }}% dedescuento</span>
+                                    Math.round((product.promociones[0].promocion.descuento*100)/product.lote_productos.precio ,0) }}% de descuento</span>
                                 <p>{{ truncateText(product.descripcion, 120) }}</p>
                                 <a href="#" class="btn btn-success" @click="agregarCarrito(product)">agregar al carrito</a>
                             </div>
@@ -52,6 +52,14 @@
                                 <img :src="product.imagen ? `/storage/${product.imagen}` : '/storage/no-disponible.png'"
                                     class="mx-auto mb-4" width="150" height="150">
                                 <h3>{{ product.nombre }}</h3>
+                                <p>
+                                    <del v-if="product.promociones[0].promocion">{{ formato_numero(product.lote_productos.precio) }}</del>
+                                    <span class="text-success" v-if="!product.promociones[0].promocion"><b> {{ formato_numero(product.lote_productos.precio) }}</b></span> &nbsp;
+                                    <span class="text-success" v-if="product.promociones[0].promocion"><b>{{ formato_numero(product.lote_productos.precio - product.promociones[0].promocion.descuento) }}</b></span>
+                                </p>
+                                <div v-if="!product.promociones[0].promocion" style="height: 40px;"></div>
+                                <span class="badge bg-danger mb-3" v-if="product.promociones[0].promocion">{{ 
+                                    Math.round((product.promociones[0].promocion.descuento*100)/product.lote_productos.precio ,0) }}% de descuento</span>
                                 <p>{{ truncateText(product.descripcion, 120) }}</p>
                                 <a href="#" class="btn btn-success" @click="agregarCarrito(product)">agregar al carrito</a>
                             </div>
@@ -79,14 +87,29 @@
     </div>
 
     <v-dialog v-model="dialogCompra" persistent>
-        <v-card width="1000" class="mx-auto">
+        <v-card width="500" class="mx-auto">
             <v-card-title class="text-center">Información</v-card-title>
-            <v-card-text>
+            <v-card-text class="text-center">
                 <p>El producto fue agregado con éxito</p>
+                <img :src="imgSuccess" alt="" width="150">
             </v-card-text>
             <v-card-actions>
-                <router-link to="carrito"><v-btn color="secondary">Ir a carrito</v-btn></router-link>
-                <v-btn color="primary" variant="tonal" @click="dialogCompra = false, limpiar()">Seguir comprando</v-btn>
+                <router-link to="carrito"><v-btn color="secondary" variant="tonal">Ir a carrito</v-btn></router-link>
+                <v-btn color="primary" variant="tonal" @click="dialogCompra = false">Cancelar</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="dialogLogin" persistent>
+        <v-card width="500" class="mx-auto">
+            <v-card-title class="text-center">Información</v-card-title>
+            <v-card-text class="text-center">
+                <p>Para poder comprar debes iniciar sesión</p>
+                <img :src="imgWarnign" alt="" width="150">
+            </v-card-text>
+            <v-card-actions>
+                <a href="/log_in"><v-btn color="secondary" variant="tonal">Iniciar Sesión</v-btn></a>
+                <v-btn color="red" variant="tonal" @click="dialogLogin = false">Cancelar</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -132,6 +155,7 @@ export default {
     data() {
         return {
             isMenuOpen: false,
+            imgSuccess: '/images/verificar.png',
             products: [],
             productsRecientes: [],
             services: [
@@ -145,6 +169,9 @@ export default {
             store: null,
             cant_producto: 0,
             dialogCompra: false,
+            logueado: false,
+            dialogLogin: false,
+            imgWarnign: '/images/advertencia.png',
         }
     },
     methods: {
@@ -201,10 +228,14 @@ export default {
             return newAmount;
         },
         agregarCarrito(producto){
-            this.store.agregarProductos(producto);
-            this.cant_producto = this.store.productos.length;
-            this.$refs.compNavBar.setCantidad(this.cant_producto);
-            this.dialogCompra = true;
+            if(this.store.logueado){
+                this.store.agregarProductos(producto);
+                this.cant_producto = this.store.productos.length;
+                this.$refs.compNavBar.setCantidad(this.cant_producto);
+                this.dialogCompra = true;
+            }else{
+                this.dialogLogin = true;
+            }
         },
     },
     mounted() {

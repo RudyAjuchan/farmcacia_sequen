@@ -1,6 +1,6 @@
 <template>
     <div>
-        <navBar :logo="imgLogo"></navBar>
+        <navBar :logo="imgLogo" :cantidad_producto="cant_producto" ref="compNavBar"></navBar>
         <!-- Sección de productos -->
         <section class="py-5">
             <div class="container">
@@ -45,27 +45,30 @@
                         <div class="row g-4">
                             <!-- Productos -->
                             <div class="col-sm-6 col-md-4" v-for="producto in productosFiltrados" :key="producto.id">
-                                <a :href="`#/detalle/${producto.id}`"
-                                    class="text-decoration-none text-reset" target="_blank">
+                                
                                     <div class="product-card p-3 text-center">
-                                        <img :src="producto.productos.imagen ? `/storage/${producto.productos.imagen}` : '/storage/no-disponible.png'"
-                                            width="150" height="150" :alt="producto.productos.nombre" />
-                                        <h5>{{ producto.productos.nombre }}</h5>
-                                        <p class="text-muted">
-                                            <del v-if="producto.producto_promocion[0]?.promocion">{{ formato_numero(producto.precio) }}</del>
-                                            <span class="text-success" v-if="!producto.producto_promocion[0]?.promocion"><b> {{ formato_numero(producto.precio) }}</b></span>
-                                            <span class="text-success" v-if="producto.producto_promocion[0]?.promocion"><b> &nbsp;{{ formato_numero(producto.precio - producto.producto_promocion[0]?.promocion?.descuento) }}</b></span>
-                                        </p>
-                                        <div v-if="!producto.producto_promocion[0]?.promocion" style="height: 25px"></div>
-                                        <p>
-                                            <span class="badge bg-danger" v-if="producto.producto_promocion[0]?.promocion">{{ 
-                                                Math.round((producto.producto_promocion[0]?.promocion?.descuento*100)/producto.precio ,0) }}% dedescuento</span>
-                                        </p>
-                                        <button class="btn btn-success" @click="agregarAlCarrito(producto)">
+                                        <a :href="`#/detalle/${producto.id}`" class="text-decoration-none text-reset" target="_blank">
+                                        <div class="card-body">
+                                            <img :src="producto.productos.imagen ? `/storage/${producto.productos.imagen}` : '/storage/no-disponible.png'"
+                                                width="150" height="150" :alt="producto.productos.nombre" />
+                                            <h5>{{ producto.productos.nombre }}</h5>
+                                            <p class="text-muted">
+                                                <del v-if="producto.producto_promocion[0]?.promocion">{{ formato_numero(producto.precio) }}</del>
+                                                <span class="text-success" v-if="!producto.producto_promocion[0]?.promocion"><b> {{ formato_numero(producto.precio) }}</b></span>
+                                                <span class="text-success" v-if="producto.producto_promocion[0]?.promocion"><b> &nbsp;{{ formato_numero(producto.precio - producto.producto_promocion[0]?.promocion?.descuento) }}</b></span>
+                                            </p>
+                                            <div v-if="!producto.producto_promocion[0]?.promocion" style="height: 25px"></div>
+                                            <p>
+                                                <span class="badge bg-danger" v-if="producto.producto_promocion[0]?.promocion">{{ 
+                                                    Math.round((producto.producto_promocion[0]?.promocion?.descuento*100)/producto.precio ,0) }}% dedescuento</span>
+                                            </p>
+                                        </div>
+                                    </a>
+                                        <a ref="#" class="btn btn-success" @click="agregarAlCarrito(producto)">
                                             Agregar al Carrito
-                                        </button>
+                                        </a>
                                     </div>
-                                </a>
+                                
                             </div>
                         </div>
 
@@ -99,6 +102,20 @@
         <Footer></Footer>
     </div>
 
+    <v-dialog v-model="dialogCompra" persistent>
+        <v-card width="500" class="mx-auto">
+            <v-card-title class="text-center">Información</v-card-title>
+            <v-card-text class="text-center">
+                <p>El producto fue agregado con éxito</p>
+                <img :src="imgSuccess" alt="" width="150">
+            </v-card-text>
+            <v-card-actions>
+                <router-link to="carrito"><v-btn color="secondary" variant="tonal">Ir a carrito</v-btn></router-link>
+                <v-btn color="primary" variant="tonal" @click="dialogCompra = false">Seguir comprando</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
     <v-overlay :model-value="overlay" persistent style="background-color: black; opacity: 0.8;"
         class="align-center justify-center">
         <v-card style="background-color: transparent; border: none;" flat>
@@ -117,6 +134,7 @@
 import navBar from './subcomponents/navBar.vue'
 import Footer from './subcomponents/footer.vue'
 import Swal from 'sweetalert2';
+import { useCarritoStore } from '../../store/carrito';
 export default {
     name: 'productosVue',
     components:{
@@ -136,7 +154,11 @@ export default {
             overlay: false,
             filtroCategoria: null, // Filtro de categoría
             filtroSubcategoria: null, // Filtro de subcategoría
-            searchQuery: '' // Para el campo de búsqueda
+            searchQuery: '', // Para el campo de búsqueda
+            store: null,
+            cant_producto: 0,
+            dialogCompra: false,
+            imgSuccess: '/images/verificar.png',
         }
     },
     methods: {
@@ -205,8 +227,20 @@ export default {
             }
         },
         agregarAlCarrito(producto) {
-            // Lógica para agregar producto al carrito
-            console.log('Agregando al carrito:', producto);
+            producto["promociones"] = [];
+            producto["promociones"][0] = [];
+            producto["promociones"][0]['promocion'] = producto["producto_promocion"][0]["promocion"];
+            producto["lote_productos"] = [];
+            producto["lote_productos"]["precio"] = producto["precio"];
+            producto["lote_productos"]["cantidad_restante"] = producto["cantidad_restante"];
+            producto["nombre"] = producto["productos"]["nombre"];
+            producto["imagen"] = producto["productos"]["imagen"];
+            producto["id"] = producto["productos"]["id"];
+            console.log(producto)
+            this.store.agregarProductos(producto);
+            this.cant_producto = this.store.productos.length;
+            this.$refs.compNavBar.setCantidad(this.cant_producto);
+            this.dialogCompra = true;
         },
         formato_numero(amount) {
             var newAmount = new Intl.NumberFormat("es-GT", { style: "currency", currency: "GTQ", }).format(amount);
@@ -261,6 +295,11 @@ export default {
         this.categorias();
         this.subcategorias();
         this.obtenerProductos();
+    },
+    created(){
+        this.store = useCarritoStore();
+        this.store.obtenerProductos();
+        this.cant_producto = this.store.productos.length;
     }
 }
 </script>
