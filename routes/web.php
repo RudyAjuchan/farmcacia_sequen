@@ -7,6 +7,7 @@ use App\Http\Controllers\ComprasController;
 use App\Http\Controllers\ecommerceController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\loteProductoController;
+use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\promocionesController;
 use App\Http\Controllers\proveedoresController;
@@ -80,6 +81,6 @@ Route::get('/productosEcommerce', [ecommerceController::class, 'productosEcommer
 Route::get('/productosPromocion', [ecommerceController::class, 'productosPromocion'])->name('productos.promocion');
 Route::post('/productoEcommerce', [ecommerceController::class, 'productoEcommerce'])->name('producto.ecommerce');
 Route::post('/productosSimilaresEcommerce', [ecommerceController::class, 'productosSimilaresEcommerce'])->name('productosSimilares.ecommerce');
-
+Route::apiResource('pedidos', PedidosController::class);
 
 require __DIR__.'/auth.php';

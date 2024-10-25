@@ -7,6 +7,7 @@ const productosComponent = () => import('../components/ecommerce/productos.vue')
 const promocionesComponent = () => import('../components/ecommerce/promociones.vue');
 const detalleProductoComponent = () => import('../components/ecommerce/detalleProducto.vue');
 const carritoComponent = () => import('../components/ecommerce/carrito.vue');
+const confirmarComponent = () => import('../components/ecommerce/confirmarCompra.vue');
 
 const routes = [
     { 
@@ -44,6 +45,11 @@ const routes = [
         path: '/carrito', 
         name: 'carritoVue', 
         component: carritoComponent 
+    },
+    { 
+        path: '/confirmarCompra', 
+        name: 'confirmarVue', 
+        component: confirmarComponent 
     },
 ];
 const router = createRouter({

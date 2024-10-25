@@ -233,6 +233,7 @@ export default {
             producto["lote_productos"] = [];
             producto["lote_productos"]["precio"] = producto["precio"];
             producto["lote_productos"]["cantidad_restante"] = producto["cantidad_restante"];
+            producto["lote_productos"]["id"] = producto["producto_promocion"][0]["lote_productos_id"];
             producto["nombre"] = producto["productos"]["nombre"];
             producto["imagen"] = producto["productos"]["imagen"];
             producto["id"] = producto["productos"]["id"];

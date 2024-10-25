@@ -25,6 +25,7 @@ export const useCarritoStore = defineStore('carrito', {
                     cantidad: 1,
                     imagen: producto.imagen,
                     precio: producto.lote_productos.precio,
+                    lote_productos_id: producto.lote_productos.id,
                     descuento: descuento,
                     descuentoOriginal: descuento,
                     cantidad_restante: producto.lote_productos.cantidad_restante,

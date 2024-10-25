@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('precio_unitario', 8, 2);
             $table->decimal('subtotal', 8, 2);
             $table->integer('estado')->default(1);
-            $table->foreignId('ventas_id')->constrained('ventas');
+            $table->foreignId('pedidos_id')->constrained('pedidos');
             $table->foreignId('productos_id')->constrained('productos');
             $table->foreignId('lote_productos_id')->constrained('lote_productos');
             $table->timestamps();

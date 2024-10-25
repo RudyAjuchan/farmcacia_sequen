@@ -50,7 +50,7 @@
                 <!-- Resumen del carrito -->
                 <div class="d-flex justify-content-between align-items-center mt-4">
                     <h5>Total: <b>{{ formato_numero(cartTotal) }}</b></h5>
-                    <button class="btn btn-secondary">Proceder al Pago</button>
+                    <a href="#/confirmarCompra" class="btn btn-secondary">Proceder al Pago</a>
                 </div>
             </div>
         </div>

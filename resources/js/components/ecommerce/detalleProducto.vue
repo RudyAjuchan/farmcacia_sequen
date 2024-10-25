@@ -120,6 +120,7 @@ export default {
             this.producto["lote_productos"] = [];
             this.producto["lote_productos"]["precio"] = this.producto["precio"];
             this.producto["lote_productos"]["cantidad_restante"] = this.producto["cantidad_restante"];
+            producto["lote_productos"]["id"] = producto["producto_promocion"][0]["lote_productos_id"];
             this.producto["nombre"] = this.producto["productos"]["nombre"];
             this.producto["imagen"] = this.producto["productos"]["imagen"];
             this.producto["id"] = this.producto["productos"]["id"];
