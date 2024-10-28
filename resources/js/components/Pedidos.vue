@@ -7,18 +7,20 @@
         </div>
         <v-text-field variant="outlined" label="buscar" v-model="search"></v-text-field>
         <v-data-table :headers="headers" :items="itemsData" :search="search">
+            <template v-slot:[`item.estado`]="{ item }">
+                <div class="row"></div>
+                <span class="badgeC bg-warning" v-if="item.estado==1">Pendiente de aprobar</span>
+                <span class="badgeC bg-success" v-if="item.estado==2">Aprobado</span>
+            </template>
             <template v-slot:[`item.created_at`]="{ item }">
                 {{ new Date(item.created_at).toLocaleString() }}
-            </template>
-            <template v-slot:[`item.estado`]="{ item }">
-                {{ item.estado==1 ? 'Pendiente' : 'Confirmado' }}
             </template>
             <template v-slot:[`item.updated_at`]="{ item }">
                 {{ new Date(item.updated_at).toLocaleString() }}
             </template>
             <template v-slot:[`item.actions`]="{ item }">
                 <v-btn color="secondary" class="me-2" variant="tonal" @click="viewDetalle(item)"><i class="fa-solid fa-eye"></i></v-btn>
-                <v-btn v-if="item.estado==1" color="red" variant="tonal" class="me-2" @click="dialogEliminar=true, dataSave.id = item.id"><i
+                <v-btn v-if="item.estado==1" color="red" variant="tonal" class="me-2" @click="dialogEliminar=true, pedidoId = item.id"><i
                         class="fa-solid fa-trash"></i></v-btn>
                 <v-btn v-if="item.estado==1" color="primary" variant="tonal" @click="dialogAprobar=true, pedidoId = item.id"><i class="fa-solid fa-square-check"></i></v-btn>
             </template>
@@ -53,7 +55,10 @@
     <v-dialog v-model="dialogAprobar" max-width="500" persistent>
         <v-card>
             <v-card-title class="headline">Confirmar acción</v-card-title>
-            <v-card-text>¿Estás seguro de confirmar la venta del pedido?</v-card-text>
+            <v-card-text>
+                <p><b>¿Estás seguro de confirmar la venta del pedido?</b></p>
+                <p>La siguiente acción se tomará como una venta válida y se descontará del stock del producto</p>
+            </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="green darken-1" text @click="aprobar">Confirmar</v-btn>
@@ -216,7 +221,7 @@ export default {
     methods: {
         getData() {
             this.overlay = true;
-            axios.get("/pedidos").then(res => {
+            axios.get("/pedidos2").then(res => {
                 this.overlay = false;
                 this.itemsData = res.data;
             }).catch((err) => {
@@ -301,7 +306,7 @@ export default {
         },
         eliminar() {
             this.overlay = true;
-            axios.delete(`/pedidos/${this.dataSave.id}`).then(res=>{
+            axios.delete(`/pedidos2/${this.pedidoId}`).then(res=>{
                 this.overlay = false;
                 toast.success("Se han guardado los cambios", {
                     autoClose: 3000,
@@ -309,7 +314,6 @@ export default {
                 });
                 this.dialogEliminar = false;
                 this.getData();
-                this.getProductos();
             }).catch((error) => {
                 this.overlay = false;
                 toast.error("¡Hubo un error al eliminar los datos!", {
@@ -343,9 +347,8 @@ export default {
         },
         aprobar(){
             this.overlay = true;
-            axios.post("/categorias", {
-                nombre: this.dataSave.nombre,
-                descripcion: this.dataSave.descripcion,
+            axios.post("/pedidos2", {
+                id: this.pedidoId,
             }).then(res => {
                 this.overlay = false;
                 toast.success("Se han guardado los datos", {
@@ -377,5 +380,9 @@ export default {
 <style>
 .custom-confirm-button {
     color: #ffffff;
+}
+.badgeC{
+    padding: 5px;
+    border-radius: 5px;
 }
 </style>

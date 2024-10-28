@@ -7,6 +7,7 @@ use App\Http\Controllers\ComprasController;
 use App\Http\Controllers\ecommerceController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\loteProductoController;
+use App\Http\Controllers\pedidos2Controller;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\promocionesController;
@@ -68,7 +69,7 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     /* RUTAS PARA LOTE PRODUCTO */
     Route::apiResource('promociones', promocionesController::class);
     /* RUTAS PARA LOTE Pedidos */
-    Route::apiResource('pedidos', PedidosController::class);
+    Route::apiResource('pedidos2', PedidosController::class);
     //RUTAS PARA SUBIR IMÀGENES
     Route::post('/upload', [FileUploadController::class, 'store']);
     Route::post('/uploadDelete', [FileUploadController::class, 'eliminarImagen']);
@@ -83,6 +84,6 @@ Route::get('/productosEcommerce', [ecommerceController::class, 'productosEcommer
 Route::get('/productosPromocion', [ecommerceController::class, 'productosPromocion'])->name('productos.promocion');
 Route::post('/productoEcommerce', [ecommerceController::class, 'productoEcommerce'])->name('producto.ecommerce');
 Route::post('/productosSimilaresEcommerce', [ecommerceController::class, 'productosSimilaresEcommerce'])->name('productosSimilares.ecommerce');
-Route::apiResource('pedidos', PedidosController::class);
+Route::apiResource('pedidos', pedidos2Controller::class);
 
 require __DIR__.'/auth.php';
