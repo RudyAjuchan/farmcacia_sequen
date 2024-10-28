@@ -89,7 +89,15 @@ export default {
                         text: 'La compra se realizó con éxito, por favor espere de 1 a 2 días hábiles para entregar según zona de ubicación',
                         icon: 'success',
                         allowOutsideClick: false,
-                    });
+                        confirmButtonColor: '#00A38C',
+                        customClass: {
+                            confirmButton: 'custom-confirm-button',  // Clase personalizada
+                        }
+                    }).then(re => {
+                        this.store.resetProducto();
+                        this.store.obtenerProductos();
+                        this.cant_producto = this.store.productos.length;
+                    })
                 }).catch((error) => {
                     this.overlay = false;
                     toast.error("¡Hubo un error al guardar los datos!", {

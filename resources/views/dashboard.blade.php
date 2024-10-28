@@ -71,10 +71,19 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#">
-                        <span class="icon"><ion-icon name="log-out-outline"></ion-icon></span>
-                        <span class="title">Sign Out</span>
+                    <a href="/dashboard#/pedidos">
+                        <span class="icon"><i class="fa-solid fa-truck-fast"></i></span>
+                        <span class="title">Pedidos</span>
                     </a>
+                </li>
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <a href="/logout" onclick="event.preventDefault(); this.closest('form').submit();">
+                            <span class="icon"><ion-icon name="log-out-outline"></ion-icon></span>
+                            <span class="title">Logout</span>
+                        </a>
+                    </form>
                 </li>
             </ul>
             <div class="toggle" @click="toggleNavigation"></div>
@@ -82,7 +91,7 @@
 
         <div class="content">
             <!-- Contenido principal aquí -->
-            <router-view ></router-view>
+            <router-view></router-view>
         </div>
     </div>
 
@@ -91,7 +100,7 @@
     <script>
         let navigation = document.querySelector('.navigation');
         let toggle = document.querySelector('.toggle');
-        toggle.onclick = function(){
+        toggle.onclick = function() {
             console.log("hola")
             navigation.classList.toggle('active');
         }

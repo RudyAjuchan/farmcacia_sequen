@@ -7,6 +7,9 @@
         </div>
         <v-text-field variant="outlined" label="buscar" v-model="search"></v-text-field>
         <v-data-table :headers="headers" :items="itemsProductos" :search="search">
+            <template v-slot:[`item.descripcion`]="{ item }">
+                {{ truncateText(item.descripcion, 50) }}
+            </template>
             <template v-slot:[`item.imagen`]="{ item }">
                 <img width="60" :src="item.imagen ? `/storage/${item.imagen}` : '/storage/no-disponible.png'" alt="Imagen del producto" />
             </template>
@@ -567,6 +570,16 @@ export default {
         },
         handleRemoveFile(){
             this.dataSave.imagen = ''
+        },
+        truncateText(text, maxLength) {
+            if (text.length > maxLength) {
+                let truncated = text.substring(0, maxLength);
+                let lastSpace = truncated.lastIndexOf(' ');
+                if (lastSpace > 0) {
+                    truncated = truncated.substring(0, lastSpace);
+                }
+                return truncated + '...';
+            }
         },
     },
     mounted() {

@@ -25,13 +25,13 @@
                                     class="mx-auto mb-4" width="150" height="150">
                                 <h3>{{ product.nombre }}</h3>
                                 <p>
-                                    <del v-if="product.promociones[0].promocion">{{ formato_numero(product.lote_productos.precio) }}</del>
-                                    <span class="text-success" v-if="!product.promociones[0].promocion"><b> {{ formato_numero(product.lote_productos.precio) }}</b></span> &nbsp;
-                                    <span class="text-success" v-if="product.promociones[0].promocion"><b>{{ formato_numero(product.lote_productos.precio - product.promociones[0].promocion.descuento) }}</b></span>
+                                    <del v-if="product.promociones[0]?.promocion">{{ formato_numero(product.lote_productos.precio) }}</del>
+                                    <span class="text-success" v-if="!product.promociones[0]?.promocion"><b> {{ formato_numero(product.lote_productos.precio) }}</b></span> &nbsp;
+                                    <span class="text-success" v-if="product.promociones[0]?.promocion"><b>{{ formato_numero(product.lote_productos.precio - product.promociones[0]?.promocion.descuento) }}</b></span>
                                 </p>
-                                <div v-if="!product.promociones[0].promocion" style="height: 40px;"></div>
-                                <span class="badge bg-danger mb-3" v-if="product.promociones[0].promocion">{{ 
-                                    Math.round((product.promociones[0].promocion.descuento*100)/product.lote_productos.precio ,0) }}% de descuento</span>
+                                <div v-if="!product.promociones[0]?.promocion" style="height: 40px;"></div>
+                                <span class="badge bg-danger mb-3" v-if="product.promociones[0]?.promocion">{{ 
+                                    Math.round((product.promociones[0]?.promocion.descuento*100)/product.lote_productos.precio ,0) }}% de descuento</span>
                                 <p>{{ truncateText(product.descripcion, 120) }}</p>
                                 <a href="#" class="btn btn-success" @click="agregarCarrito(product)">agregar al carrito</a>
                             </div>
@@ -53,13 +53,13 @@
                                     class="mx-auto mb-4" width="150" height="150">
                                 <h3>{{ product.nombre }}</h3>
                                 <p>
-                                    <del v-if="product.promociones[0].promocion">{{ formato_numero(product.lote_productos.precio) }}</del>
-                                    <span class="text-success" v-if="!product.promociones[0].promocion"><b> {{ formato_numero(product.lote_productos.precio) }}</b></span> &nbsp;
-                                    <span class="text-success" v-if="product.promociones[0].promocion"><b>{{ formato_numero(product.lote_productos.precio - product.promociones[0].promocion.descuento) }}</b></span>
+                                    <del v-if="product.promociones[0]?.promocion">{{ formato_numero(product.lote_productos.precio) }}</del>
+                                    <span class="text-success" v-if="!product.promociones[0]?.promocion"><b> {{ formato_numero(product.lote_productos.precio) }}</b></span> &nbsp;
+                                    <span class="text-success" v-if="product.promociones[0]?.promocion"><b>{{ formato_numero(product.lote_productos.precio - product.promociones[0]?.promocion.descuento) }}</b></span>
                                 </p>
-                                <div v-if="!product.promociones[0].promocion" style="height: 40px;"></div>
-                                <span class="badge bg-danger mb-3" v-if="product.promociones[0].promocion">{{ 
-                                    Math.round((product.promociones[0].promocion.descuento*100)/product.lote_productos.precio ,0) }}% de descuento</span>
+                                <div v-if="!product.promociones[0]?.promocion" style="height: 40px;"></div>
+                                <span class="badge bg-danger mb-3" v-if="product.promociones[0]?.promocion">{{ 
+                                    Math.round((product.promociones[0]?.promocion.descuento*100)/product.lote_productos.precio ,0) }}% de descuento</span>
                                 <p>{{ truncateText(product.descripcion, 120) }}</p>
                                 <a href="#" class="btn btn-success" @click="agregarCarrito(product)">agregar al carrito</a>
                             </div>

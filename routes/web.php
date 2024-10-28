@@ -67,6 +67,8 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/loteProductosPromociones', [loteProductoController::class, 'loteProductosPromociones'])->name('productos.destacados');
     /* RUTAS PARA LOTE PRODUCTO */
     Route::apiResource('promociones', promocionesController::class);
+    /* RUTAS PARA LOTE Pedidos */
+    Route::apiResource('pedidos', PedidosController::class);
     //RUTAS PARA SUBIR IMÀGENES
     Route::post('/upload', [FileUploadController::class, 'store']);
     Route::post('/uploadDelete', [FileUploadController::class, 'eliminarImagen']);

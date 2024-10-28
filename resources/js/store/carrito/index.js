@@ -12,7 +12,7 @@ export const useCarritoStore = defineStore('carrito', {
             this.productos = JSON.parse(localStorage.getItem('productos')) || [];
         },
         agregarProductos(producto) {
-            const descuento = producto.promociones[0].promocion ? producto.promociones[0].promocion.descuento : 0;
+            const descuento = producto.promociones[0]?.promocion ? producto.promociones[0]?.promocion.descuento : 0;
             const productoExistente = this.productos.find(item => item.id === producto.id);
             if (productoExistente && (productoExistente.cantidad + 1) <= productoExistente.cantidad_restante) {
                 productoExistente.cantidad += 1;
@@ -50,6 +50,10 @@ export const useCarritoStore = defineStore('carrito', {
         },
         setAuth(estado){
             this.logueado = estado;
+        },
+        resetProducto(){
+            this.productos = [];
+            localStorage.setItem('productos', JSON.stringify(this.productos));
         },
         logout(){
             this.productos = [];

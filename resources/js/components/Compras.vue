@@ -170,6 +170,7 @@ export default {
         return {
             headers: [
                 { title: 'Fecha compra', key: 'fecha_compra', align: 'start' },
+                { title: 'Producto', key: 'detalle_compras[0].producto.nombre', align: 'start' },
                 { title: 'Total', key: 'total', align: 'start' },
                 { title: 'Proveedor', key: 'proveedor.nombre', align: 'start' },
                 { title: 'Creado', key: 'created_at', align: 'center' },
