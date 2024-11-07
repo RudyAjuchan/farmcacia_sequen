@@ -19,15 +19,20 @@
                                 </tr>
                                 <tr>
                                     <th>Dirección *</th>
-                                    <td><input :value="user.direccion" class="form-control" placeholder="Introduce tu dirección (obligatorio)" @input="setDireccion($event.target.value)"></td>
+                                    <td><input :value="user.direccion" class="form-control"
+                                            placeholder="Introduce tu dirección (obligatorio)"
+                                            @input="setDireccion($event.target.value)"></td>
                                 </tr>
                                 <tr>
                                     <th>Nit</th>
-                                    <td><input :value="user.nit" class="form-control" placeholder="Introduce tu Nit" @input="setNit($event.target.value)"></td>
+                                    <td><input :value="user.nit" class="form-control" placeholder="Introduce tu Nit"
+                                            @input="setNit($event.target.value)"></td>
                                 </tr>
                                 <tr>
                                     <th>Telefono *</th>
-                                    <td><input :value="user.telefono" class="form-control" placeholder="Introduce tu número de celular o teléfono (obligatorio)" @input="setTelefono($event.target.value)"></td>
+                                    <td><input :value="user.telefono" class="form-control"
+                                            placeholder="Introduce tu número de celular o teléfono (obligatorio)"
+                                            @input="setTelefono($event.target.value)"></td>
                                 </tr>
                             </tbody>
                         </v-table>
@@ -36,12 +41,27 @@
                     </v-card-text>
                 </v-card>
                 <div class="d-flex justify-content-end align-items-center mt-4">
-                    <v-btn color="primary" variant="tonal" @click="finalizarCompra()" :disabled="cant_producto>0 ? false: true">Finalizar compra</v-btn>
+                    <v-btn color="primary" variant="tonal" @click="finalizarCompra()"
+                        :disabled="cant_producto>0 ? false: true">Finalizar compra</v-btn>
                 </div>
             </v-container>
         </div>
         <!-- Footer -->
         <Footer></Footer>
+
+        <v-overlay :model-value="overlay" persistent style="background-color: black; opacity: 0.8;"
+            class="align-center justify-center">
+            <v-card style="background-color: transparent; border: none;" flat>
+                <v-card-text>
+
+                    <h3 class="text-center text-white"> Cargando datos </h3>
+                </v-card-text>
+                <v-card-actions class="justify-center aling-center">
+
+                    <v-progress-circular color="success" indeterminate size="64"></v-progress-circular>
+                </v-card-actions>
+            </v-card>
+        </v-overlay>
     </div>
 </template>
 <script>
@@ -64,6 +84,7 @@ export default {
             imgLogo: "/images/image.png",
             user: [],
             productos: [],
+            overlay: false,
         }
     },
     methods: {
@@ -74,19 +95,23 @@ export default {
                 console.error('Error fetching user:', error);
             });
         },
-        finalizarCompra(){
+        async finalizarCompra(){
+            this.overlay = true
             if(this.user.direccion!=null && this.user.telefono!=null){
                 let total = this.productos.reduce((total, item) => {
                     return total + item.subtotal;
                 }, 0);
-                axios.post("/pedidos", {
+                const response = await axios.post('/pedidos', {
                     productos: this.productos,
                     usuario: this.user,
                     total: total,
-                }).then(res => {
+                });
+
+                if (response.status === 201) {
+                    this.overlay = false
                     Swal.fire({
                         title: '¡Información de compra!',
-                        text: 'La compra se realizó con éxito, por favor espere de 1 a 2 días hábiles para entregar según zona de ubicación',
+                        text: 'La compra se realizó con éxito, por favor espere de 1 a 2 días hábiles para entregar según zona de ubicación, le hemos enviado también el detalle de su pedido a su correo',
                         icon: 'success',
                         allowOutsideClick: false,
                         confirmButtonColor: '#00A38C',
@@ -97,8 +122,9 @@ export default {
                         this.store.resetProducto();
                         this.store.obtenerProductos();
                         this.cant_producto = this.store.productos.length;
+                        this.$router.push('/');
                     })
-                }).catch((error) => {
+                }else{
                     this.overlay = false;
                     toast.error("¡Hubo un error al guardar los datos!", {
                         autoClose: 3000,
@@ -109,7 +135,7 @@ export default {
                     } else {
                         // Manejo de otros errores o código adicional
                     }
-                });
+                }
             }else{
                 Swal.fire({
                     title: '¡Falta dirección o telefono en ingresar!',

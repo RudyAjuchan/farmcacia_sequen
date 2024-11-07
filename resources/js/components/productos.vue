@@ -20,9 +20,9 @@
                 {{ new Date(item.updated_at).toLocaleString() }}
             </template>
             <template v-slot:[`item.actions`]="{ item }">
-                <v-btn color="secondary" class="me-2" variant="tonal" @click="editar(item)"><i
+                <v-btn color="secondary" class="me-2 mt-1" variant="tonal" @click="editar(item)"><i
                         class="fa-solid fa-pen"></i></v-btn>
-                <v-btn color="red" variant="tonal" @click="dialogEliminar=true, dataSave.id = item.id"><i class="fa-solid fa-trash"></i></v-btn>
+                <v-btn color="red" variant="tonal" @click="dialogEliminar=true, dataSave.id = item.id" class="me-2 mt-1"><i class="fa-solid fa-trash"></i></v-btn>
             </template>
         </v-data-table>
     </div>
@@ -442,6 +442,7 @@ export default {
             this.dataSave.nombre = item.nombre;
             this.dataSave.descripcion = item.descripcion;
             this.dataSave.proveedor = item.proveedor.id;
+            this.dataSave.subcategoria = item.subcategoria.id
             this.dataSave.id = item.id;
 
             if(item.imagen){
@@ -463,6 +464,7 @@ export default {
                 descripcion: this.dataSave.descripcion,
                 proveedor: this.dataSave.proveedor,
                 imagen: this.dataSave.imagen,
+                subcategoria: this.dataSave.subcategoria,
                 image_antigua: this.preloadedFiles[0] ? this.preloadedFiles[0].image: '',
             }).then(res => {
                 this.overlay = false;
@@ -579,6 +581,8 @@ export default {
                     truncated = truncated.substring(0, lastSpace);
                 }
                 return truncated + '...';
+            }else{
+                return text
             }
         },
     },

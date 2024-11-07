@@ -59,6 +59,7 @@ class ProductosController extends Controller
                 $producto->nombre = $request->nombre;
                 $producto->descripcion = $request->descripcion;
                 $producto->proveedores_id = $request->proveedor;
+                $producto->subcategorias_id = $request->subcategoria;
                 if($request->imagen !='' && $request->image_antigua!=''){
                     if($request->imagen !='uploads/'.$request->image_antigua){
                         Storage::disk('public')->delete('uploads/'.$request->image_antigua);

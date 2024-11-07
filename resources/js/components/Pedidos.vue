@@ -1,10 +1,6 @@
 <template>
     <div>
         <h2 class="text-center mb-10">Pedidos</h2>
-        <div class="text-end my-5">
-            <v-btn variant="tonal" color="primary" @click="card = true, cardAction = 'nuevo'"><i
-                    class="fa-solid fa-plus"></i> Nuevo</v-btn>
-        </div>
         <v-text-field variant="outlined" label="buscar" v-model="search"></v-text-field>
         <v-data-table :headers="headers" :items="itemsData" :search="search">
             <template v-slot:[`item.estado`]="{ item }">
@@ -356,8 +352,8 @@ export default {
                     position: toast.POSITION.BOTTOM_RIGHT,
                 });
                 this.limpiar();
-                this.card = false;
-                this.getCategorias();
+                this.dialogAprobar = false;
+                this.getData();
             }).catch((error) => {
                 this.overlay = false;
                 toast.error("¡Hubo un error al guardar los datos!", {

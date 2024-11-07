@@ -91,7 +91,7 @@ class ecommerceController extends Controller
     public function productosEcommerce(Request $request) {
         $hoy = now()->toDateString(); // Obtener la fecha actual en formato 'YYYY-MM-DD'
 
-        $query = Lote_producto::with(['productos', 'productos.subcategoria', 'productos.subcategoria.categoria', 'producto_promocion' => function ($query) {
+        $query = Lote_producto::with(['productos', 'productos.subcategoria', 'productos.subcategoria.categoria', 'productos.loteProductos', 'producto_promocion' => function ($query) {
             $query->where('estado', 1);
         }, 'producto_promocion.promocion' => function ($query) use ($hoy) {
             $query

@@ -115,6 +115,20 @@
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <v-dialog v-model="dialogLogin" persistent>
+        <v-card width="500" class="mx-auto">
+            <v-card-title class="text-center">Información</v-card-title>
+            <v-card-text class="text-center">
+                <p>Para poder comprar debes iniciar sesión</p>
+                <img :src="imgWarnign" alt="" width="150">
+            </v-card-text>
+            <v-card-actions>
+                <a href="/log_in"><v-btn color="secondary" variant="tonal">Iniciar Sesión</v-btn></a>
+                <v-btn color="red" variant="tonal" @click="dialogLogin = false">Cancelar</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 <script>
 import navBar from './subcomponents/navBar.vue'
@@ -166,6 +180,9 @@ export default {
             store: null,
             cant_producto: 0,
             dialogCompra: false,
+            logueado: false,
+            dialogLogin: false,
+            imgWarnign: '/images/advertencia.png',
         }
     },
     methods: {
@@ -198,16 +215,20 @@ export default {
             });
         },
         agregarAlCarrito(producto) {
-            producto["promociones"] = [];
-            producto["promociones"][0] = [];
-            producto["promociones"][0]['promocion'] = producto["promocion"]
-            producto["nombre"] = producto["lote_productos"]["productos"]["nombre"];
-            producto["imagen"] = producto["lote_productos"]["productos"]["imagen"];
-            producto["id"] = producto["lote_productos"]["productos"]["id"];
-            this.store.agregarProductos(producto);
-            this.cant_producto = this.store.productos.length;
-            this.$refs.compNavBar.setCantidad(this.cant_producto);
-            this.dialogCompra = true;
+            if(this.store.logueado){
+                producto["promociones"] = [];
+                producto["promociones"][0] = [];
+                producto["promociones"][0]['promocion'] = producto["promocion"]
+                producto["nombre"] = producto["lote_productos"]["productos"]["nombre"];
+                producto["imagen"] = producto["lote_productos"]["productos"]["imagen"];
+                producto["id"] = producto["lote_productos"]["productos"]["id"];
+                this.store.agregarProductos(producto);
+                this.cant_producto = this.store.productos.length;
+                this.$refs.compNavBar.setCantidad(this.cant_producto);
+                this.dialogCompra = true;
+            }else{
+                this.dialogLogin = true;
+            }
         },
         cambiarPagina(pagina) {
             if (pagina >= 1 && pagina <= this.totalPaginas) {

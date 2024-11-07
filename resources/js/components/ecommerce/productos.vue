@@ -129,6 +129,20 @@
             </v-card-actions>
         </v-card>
     </v-overlay>
+
+    <v-dialog v-model="dialogLogin" persistent>
+        <v-card width="500" class="mx-auto">
+            <v-card-title class="text-center">Información</v-card-title>
+            <v-card-text class="text-center">
+                <p>Para poder comprar debes iniciar sesión</p>
+                <img :src="imgWarnign" alt="" width="150">
+            </v-card-text>
+            <v-card-actions>
+                <a href="/log_in"><v-btn color="secondary" variant="tonal">Iniciar Sesión</v-btn></a>
+                <v-btn color="red" variant="tonal" @click="dialogLogin = false">Cancelar</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 <script>
 import navBar from './subcomponents/navBar.vue'
@@ -159,6 +173,9 @@ export default {
             cant_producto: 0,
             dialogCompra: false,
             imgSuccess: '/images/verificar.png',
+            logueado: false,
+            dialogLogin: false,
+            imgWarnign: '/images/advertencia.png',
         }
     },
     methods: {
@@ -227,21 +244,25 @@ export default {
             }
         },
         agregarAlCarrito(producto) {
-            producto["promociones"] = [];
-            producto["promociones"][0] = [];
-            producto["promociones"][0]['promocion'] = producto["producto_promocion"][0]["promocion"];
-            producto["lote_productos"] = [];
-            producto["lote_productos"]["precio"] = producto["precio"];
-            producto["lote_productos"]["cantidad_restante"] = producto["cantidad_restante"];
-            producto["lote_productos"]["id"] = producto["producto_promocion"][0]["lote_productos_id"];
-            producto["nombre"] = producto["productos"]["nombre"];
-            producto["imagen"] = producto["productos"]["imagen"];
-            producto["id"] = producto["productos"]["id"];
-            console.log(producto)
-            this.store.agregarProductos(producto);
-            this.cant_producto = this.store.productos.length;
-            this.$refs.compNavBar.setCantidad(this.cant_producto);
-            this.dialogCompra = true;
+            if(this.store.logueado){
+                producto["promociones"] = [];
+                producto["promociones"][0] = [];
+                producto["promociones"][0]['promocion'] = producto["producto_promocion"][0] ? producto["producto_promocion"][0]["promocion"] : null;
+                producto["lote_productos"] = [];
+                producto["lote_productos"]["precio"] = producto["precio"];
+                producto["lote_productos"]["cantidad_restante"] = producto["cantidad_restante"];
+                producto["lote_productos"]["id"] = producto["producto_promocion"][0] ? producto["producto_promocion"][0]["lote_productos_id"] : producto["productos"]['lote_productos'][0]['id'];
+                producto["nombre"] = producto["productos"]["nombre"];
+                producto["imagen"] = producto["productos"]["imagen"];
+                producto["id"] = producto["productos"]["id"];
+                console.log(producto)
+                this.store.agregarProductos(producto);
+                this.cant_producto = this.store.productos.length;
+                this.$refs.compNavBar.setCantidad(this.cant_producto);
+                this.dialogCompra = true;
+            }else{
+                this.dialogLogin = true;
+            }
         },
         formato_numero(amount) {
             var newAmount = new Intl.NumberFormat("es-GT", { style: "currency", currency: "GTQ", }).format(amount);
